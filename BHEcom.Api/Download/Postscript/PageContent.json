@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "5fbc425f-d18f-4362-8846-7a4541441614",
+		"name": "PageContent",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37791426",
+		"_collection_link": "https://bh5555.postman.co/workspace/Bh~2457ee2d-f2ae-4c5b-8f57-74219f3cd44a/collection/37791426-5fbc425f-d18f-4362-8846-7a4541441614?action=share&source=collection_link&creator=37791426"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"pageID\": \"10eb3eea-49dc-4abc-30bf-08dcc66079cf\",\r\n  \"contentType\": \"Device\",\r\n  \"content\": \"Discover the latest smartphones and gadgets available at unbeatable prices. Shop now and enjoy fast delivery across Bangladesh.\",\r\n  \"imageUrl\": \"https://www.yourecommercesite.com/images/smartphones-banner.jpg\",\r\n  \"videoUrl\": \"https://www.yourecommercesite.com/videos/smartphones-intro.mp4\",\r\n  \"linkUrl\": \"https://www.yourecommercesite.com/electronics\",\r\n  \"linkText\": \"Explore Electronics\",\r\n  \"sortOrder\": 1,\r\n  \"createdBy\": \"eb122a88-15e5-4d5b-ad22-fa8f82aaa475\",\r\n  \"createDate\": \"2024-08-27T06:30:00.000Z\",\r\n  \"lastModifiedBy\": \"eb122a88-15e5-4d5b-ad22-fa8f82aaa475\",\r\n  \"lastModifiedDate\": \"2024-08-27T06:30:00.000Z\",\r\n  \"isActive\": true\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/PageContents/Create",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"PageContents",
+						"Create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAll",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/PageContents/GetAll",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"PageContents",
+						"GetAll"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetById",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://localhost:7203/api/PageContents/GetById/70FB3EB3-B3B9-4E4E-6802-08DCC661684C",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"PageContents",
+						"GetById",
+						"70FB3EB3-B3B9-4E4E-6802-08DCC661684C"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"contentID\": \"70fb3eb3-b3b9-4e4e-6802-08dcc661684c\",\r\n    \"pageID\": \"10eb3eea-49dc-4abc-30bf-08dcc66079cf\",\r\n    \"contentType\": \"Device\",\r\n    \"content\": \"Discover the latest smartphones and gadgets available at unbeatable prices. Shop now and enjoy fast delivery across Bangladesh.\",\r\n    \"imageUrl\": \"https://www.bhecommerce.com/images/smartphones-banner.jpg\",\r\n    \"videoUrl\": \"https://www.bhecommerce.com/videos/smartphones-intro.mp4\",\r\n    \"linkUrl\": \"https://www.bhecommerce.com/electronics\",\r\n    \"linkText\": \"Explore Electronics\",\r\n    \"sortOrder\": 1,\r\n    \"createdBy\": \"eb122a88-15e5-4d5b-ad22-fa8f82aaa475\",\r\n    \"createDate\": \"2024-08-27T06:30:00\",\r\n    \"lastModifiedBy\": \"eb122a88-15e5-4d5b-ad22-fa8f82aaa475\",\r\n    \"lastModifiedDate\": \"2024-08-27T06:30:00\",\r\n    \"isActive\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/PageContents/Update/70FB3EB3-B3B9-4E4E-6802-08DCC661684C",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"PageContents",
+						"Update",
+						"70FB3EB3-B3B9-4E4E-6802-08DCC661684C"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/PageContents/Delete/3ce91d9e-8cc9-4919-6803-08dcc661684c",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"PageContents",
+						"Delete",
+						"3ce91d9e-8cc9-4919-6803-08dcc661684c"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

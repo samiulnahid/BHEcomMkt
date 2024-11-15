@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "92e85e47-5a56-4527-9915-63fecbae045b",
+		"name": "SEO",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37791426",
+		"_collection_link": "https://bh5555.postman.co/workspace/Bh~2457ee2d-f2ae-4c5b-8f57-74219f3cd44a/collection/37791426-92e85e47-5a56-4527-9915-63fecbae045b?action=share&source=collection_link&creator=37791426"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"metaTitle\": \"Best Online Shopping in Bangladesh | Buy Latest Products at Discounted Prices\",\r\n  \"metaDescription\": \"Shop the latest electronics, fashion, beauty products, and more in Bangladesh. Enjoy fast delivery, secure payments, and 24/7 customer support.\",\r\n  \"metaKeywords\": \"online shopping Bangladesh, electronics, fashion, beauty products, best prices, e-commerce Bangladesh\",\r\n  \"canonicalUrl\": \"https://www.yourecommercesite.com\",\r\n  \"robotsContent\": \"index, follow\",\r\n  \"openGraphTitle\": \"Discover Top Deals on Electronics, Fashion, and More in Bangladesh\",\r\n  \"openGraphDescription\": \"Get the best products at unbeatable prices on our e-commerce site in Bangladesh. Shop now for exclusive discounts and offers.\",\r\n  \"openGraphImage\": \"https://www.yourecommercesite.com/images/og-image.jpg\",\r\n  \"twitterCard\": \"summary_large_image\",\r\n  \"twitterTitle\": \"Shop Top Products at Great Prices in Bangladesh\",\r\n  \"twitterDescription\": \"Find everything you need at the best prices on our e-commerce platform in Bangladesh. From electronics to fashion, shop now!\",\r\n  \"twitterImage\": \"https://www.yourecommercesite.com/images/twitter-image.jpg\",\r\n  \"createdBy\": \"eb122a88-15e5-4d5b-ad22-fa8f82aaa475\",\r\n  \"createDate\": \"2024-08-27T06:00:00.000Z\",\r\n  \"lastModifiedBy\": \"eb122a88-15e5-4d5b-ad22-fa8f82aaa475\",\r\n  \"lastModifiedDate\": \"2024-08-27T06:00:00.000Z\",\r\n  \"isActive\": true\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/SEO/Create",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"SEO",
+						"Create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAll",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/SEO/GetAll",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"SEO",
+						"GetAll"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetById",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://localhost:7203/api/SEO/GetById/13389b87-ea31-49b0-9435-08dcc65e4fab",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"SEO",
+						"GetById",
+						"13389b87-ea31-49b0-9435-08dcc65e4fab"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"seoId\": \"13389b87-ea31-49b0-9435-08dcc65e4fab\",\r\n    \"metaTitle\": \"Best Online Shopping in Bangladesh | Buy Latest Products at Discounted Prices\",\r\n    \"metaDescription\": \"Shop the latest electronics, fashion, beauty products, and more in Bangladesh. Enjoy fast delivery, secure payments, and 24/7 customer support.\",\r\n    \"metaKeywords\": \"online shopping Bangladesh, electronics, fashion, beauty products, best prices, e-commerce Bangladesh\",\r\n    \"canonicalUrl\": \"https://www.bhecommerce.com\",\r\n    \"robotsContent\": \"index, follow\",\r\n    \"openGraphTitle\": \"Discover Top Deals on Electronics, Fashion, and More in Bangladesh\",\r\n    \"openGraphDescription\": \"Get the best products at unbeatable prices on our e-commerce site in Bangladesh. Shop now for exclusive discounts and offers.\",\r\n    \"openGraphImage\": \"https://www.bhecommerce.com/images/og-image.jpg\",\r\n    \"twitterCard\": \"summary_large_image\",\r\n    \"twitterTitle\": \"Shop Top Products at Great Prices in Bangladesh\",\r\n    \"twitterDescription\": \"Find everything you need at the best prices on our e-commerce platform in Bangladesh. From electronics to fashion, shop now!\",\r\n    \"twitterImage\": \"https://www.bhecommerce.com/images/twitter-image.jpg\",\r\n    \"createdBy\": \"eb122a88-15e5-4d5b-ad22-fa8f82aaa475\",\r\n    \"createDate\": \"2024-08-27T06:00:00\",\r\n    \"lastModifiedBy\": \"eb122a88-15e5-4d5b-ad22-fa8f82aaa475\",\r\n    \"lastModifiedDate\": \"2024-08-27T06:00:00\",\r\n    \"isActive\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/SEO/Update/13389b87-ea31-49b0-9435-08dcc65e4fab",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"SEO",
+						"Update",
+						"13389b87-ea31-49b0-9435-08dcc65e4fab"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/SEO/Delete/89253475-1ffd-4569-0586-08dcc65fc5f6",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"SEO",
+						"Delete",
+						"89253475-1ffd-4569-0586-08dcc65fc5f6"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

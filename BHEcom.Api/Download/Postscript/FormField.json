@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "c9c86bec-c846-469a-a339-0594df2e1a2c",
+		"name": "FormField",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37791426",
+		"_collection_link": "https://bh5555.postman.co/workspace/Bh~2457ee2d-f2ae-4c5b-8f57-74219f3cd44a/collection/37791426-c9c86bec-c846-469a-a339-0594df2e1a2c?action=share&source=collection_link&creator=37791426"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"formID\": \"bafa031a-f56e-4506-fbed-08dcc67efd89\",\r\n  \"fieldName\": \"submitButton\",\r\n  \"fieldType\": \"submit\",\r\n  \"fieldLabel\": \"Submit\",\r\n  \"isRequired\": false,\r\n  \"sortOrder\": 5,\r\n  \"tagType\": \"button\",\r\n  \"placeholder\": \"\",\r\n  \"cssforLabel\": \"button-label-class\",\r\n  \"cssforField\": \"button-class\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/FormFields/Create",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"FormFields",
+						"Create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAll",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/FormFields/GetAll",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"FormFields",
+						"GetAll"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetById",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://localhost:7203/api/FormFields/GetById/5898843f-55d4-476d-88c2-08dcc680653d",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"FormFields",
+						"GetById",
+						"5898843f-55d4-476d-88c2-08dcc680653d"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"fieldID\": \"5898843f-55d4-476d-88c2-08dcc680653d\",\r\n    \"formID\": \"bafa031a-f56e-4506-fbed-08dcc67efd89\",\r\n    \"fieldName\": \"customerName\",\r\n    \"fieldType\": \"text\",\r\n    \"fieldLabel\": \"Full Name\",\r\n    \"isRequired\": true,\r\n    \"sortOrder\": 1,\r\n    \"tagType\": \"input\",\r\n    \"placeholder\": \"Enter your full name\",\r\n    \"cssforLabel\": \"label-class\",\r\n    \"cssforField\": \"input-class\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/FormFields/Update/5898843f-55d4-476d-88c2-08dcc680653d",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"FormFields",
+						"Update",
+						"5898843f-55d4-476d-88c2-08dcc680653d"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/FormFields/Delete/b1e6f543-428f-480d-88c7-08dcc680653d",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"FormFields",
+						"Delete",
+						"b1e6f543-428f-480d-88c7-08dcc680653d"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

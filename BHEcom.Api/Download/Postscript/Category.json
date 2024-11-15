@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "82248a9c-d7c5-466e-9310-9eaf7962f8f6",
+		"name": "Category",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37791426",
+		"_collection_link": "https://bh5555.postman.co/workspace/Bh~2457ee2d-f2ae-4c5b-8f57-74219f3cd44a/collection/37791426-82248a9c-d7c5-466e-9310-9eaf7962f8f6?action=share&source=collection_link&creator=37791426"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"categoryName\": \"Women's & Girls' Fashion\",\r\n        \"description\": \"Only for women and girls\",\r\n        \"parentCategoryID\": \"6e5cd733-a889-4609-c29d-08dcbde60f28\",\r\n        \"createdBy\": \"2aabd81b-ae5b-46ee-bf35-cfbd0d57b666\",\r\n        \"createdDate\": \"2024-08-16T11:07:13.977\",\r\n        \"modifiedBy\": \"2aabd81b-ae5b-46ee-bf35-cfbd0d57b666\",\r\n        \"modifiedDate\": null,\r\n        \"isActive\": true\r\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/Categories/Create",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Categories",
+						"Create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAll",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/Categories/GetAll",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Categories",
+						"GetAll"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetById",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://localhost:7203/api/Categories/GetById/6e5cd733-a889-4609-c29d-08dcbde60f28",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Categories",
+						"GetById",
+						"6e5cd733-a889-4609-c29d-08dcbde60f28"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"categoryID\": \"daecd8fe-390c-4279-9ae7-08dcbdf110d0\",\r\n        \"categoryName\": \"Electronic Device\",\r\n        \"description\": null,\r\n        \"parentCategoryID\": \"00000000-0000-0000-0000-000000000000\",\r\n        \"createdBy\": \"2aabd81b-ae5b-46ee-bf35-cfbd0d57b666\",\r\n        \"createdDate\": \"2024-08-16T12:42:40.59\",\r\n        \"modifiedBy\": \"2aabd81b-ae5b-46ee-bf35-cfbd0d57b666\",\r\n        \"modifiedDate\": \"2024-08-16T12:42:40.59\",\r\n        \"isActive\": true\r\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/Categories/Update/daecd8fe-390c-4279-9ae7-08dcbdf110d0",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Categories",
+						"Update",
+						"daecd8fe-390c-4279-9ae7-08dcbdf110d0"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/Categories/Delete/268a1fe5-ea86-4fc5-c2a3-08dcbde60f28",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Categories",
+						"Delete",
+						"268a1fe5-ea86-4fc5-c2a3-08dcbde60f28"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

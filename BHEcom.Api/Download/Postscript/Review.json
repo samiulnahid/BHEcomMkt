@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "efb0f837-d665-4f8b-abd0-0f98e1f4b669",
+		"name": "Review",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37791426",
+		"_collection_link": "https://bh5555.postman.co/workspace/Bh~2457ee2d-f2ae-4c5b-8f57-74219f3cd44a/collection/37791426-efb0f837-d665-4f8b-abd0-0f98e1f4b669?action=share&source=collection_link&creator=37791426"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"productID\": \"C5D2898B-7417-4422-27DF-08DCC653F4E9\",\r\n  \"userID\": \"eb122a88-15e5-4d5b-ad22-fa8f82aaa475\",\r\n  \"rating\":3,\r\n  \"reviewText\": \"The Samsung Galaxy S23 Ultra is a powerful device, but it's overpriced for what it offers. The battery life is good, but I had issues with the software update causing some instability.\",\r\n  \"reviewDate\": \"2024-08-27T06:47:21.441Z\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/Reviews/Create",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Reviews",
+						"Create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAll",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/Reviews/GetAll",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Reviews",
+						"GetAll"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetById",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://localhost:7203/api/Reviews/GetById/1beeff29-5490-437d-381d-08dcc6646599",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Reviews",
+						"GetById",
+						"1beeff29-5490-437d-381d-08dcc6646599"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"reviewID\": \"1beeff29-5490-437d-381d-08dcc6646599\",\r\n    \"productID\": \"c5d2898b-7417-4422-27df-08dcc653f4e9\",\r\n    \"userID\": \"eb122a88-15e5-4d5b-ad22-fa8f82aaa475\",\r\n    \"rating\": 5,\r\n    \"reviewText\": \"The Samsung Galaxy S23 Ultra is an exceptional phone with a stunning display and powerful performance. The camera quality is top-notch, and the battery life is impressive. Highly recommended!\",\r\n    \"reviewDate\": \"2024-08-27T06:47:21.44\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/Reviews/Update/1beeff29-5490-437d-381d-08dcc6646599",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Reviews",
+						"Update",
+						"1beeff29-5490-437d-381d-08dcc6646599"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/Reviews/Delete/b61ddfb1-09da-4002-381e-08dcc6646599",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Reviews",
+						"Delete",
+						"b61ddfb1-09da-4002-381e-08dcc6646599"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "d46708f0-a468-4cfe-89e4-12990cd9b3e3",
+		"name": "CartItem",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37791426",
+		"_collection_link": "https://bh5555.postman.co/workspace/Bh~2457ee2d-f2ae-4c5b-8f57-74219f3cd44a/collection/37791426-d46708f0-a468-4cfe-89e4-12990cd9b3e3?action=share&source=collection_link&creator=37791426"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"cartID\": \"38399a1b-1cf3-4dbf-9b79-08dcc655d557\",\r\n  \"productID\": \"c5d2898b-7417-4422-27df-08dcc653f4e9\",\r\n  \"quantity\": 0\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/CartItems/Create",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"CartItems",
+						"Create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAll",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/CartItems/GetAll",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"CartItems",
+						"GetAll"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetById",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://localhost:7203/api/CartItems/GetById/655d7da7-8078-4ffb-9905-08dcc6568b8b",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"CartItems",
+						"GetById",
+						"655d7da7-8078-4ffb-9905-08dcc6568b8b"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"cartItemID\": \"655d7da7-8078-4ffb-9905-08dcc6568b8b\",\r\n    \"cartID\": \"38399a1b-1cf3-4dbf-9b79-08dcc655d557\",\r\n    \"productID\": \"c5d2898b-7417-4422-27df-08dcc653f4e9\",\r\n    \"quantity\": 5\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/CartItems/Update/655d7da7-8078-4ffb-9905-08dcc6568b8b",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"CartItems",
+						"Update",
+						"655d7da7-8078-4ffb-9905-08dcc6568b8b"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/CartItems/Delete/994c482a-da46-4c85-9906-08dcc6568b8b",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"CartItems",
+						"Delete",
+						"994c482a-da46-4c85-9906-08dcc6568b8b"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "2fc42e85-a2a0-4eb3-b225-2106ddbbc9e3",
+		"name": "Order",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37791426",
+		"_collection_link": "https://bh5555.postman.co/workspace/Bh~2457ee2d-f2ae-4c5b-8f57-74219f3cd44a/collection/37791426-2fc42e85-a2a0-4eb3-b225-2106ddbbc9e3?action=share&source=collection_link&creator=37791426"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"userID\": \"eb122a88-15e5-4d5b-ad22-fa8f82aaa475\",\r\n  \"totalAmount\": 15999,\r\n  \"orderDate\": \"2024-08-27T05:38:49.851Z\",\r\n  \"status\": \"Processing\",\r\n  \"shippingAddressID\": \"a1e73be4-7394-487f-7b78-08dcc65af829\",\r\n  \"billingAddressID\": \"806376a1-7006-4d67-7b79-08dcc65af829\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/Orders/Create",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Orders",
+						"Create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAll",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/Orders/GetAll",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Orders",
+						"GetAll"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetById",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://localhost:7203/api/Orders/GetById/901d347c-3cd1-427c-2a9a-08dcc65b9a0e",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Orders",
+						"GetById",
+						"901d347c-3cd1-427c-2a9a-08dcc65b9a0e"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"orderID\": \"901d347c-3cd1-427c-2a9a-08dcc65b9a0e\",\r\n    \"userID\": \"eb122a88-15e5-4d5b-ad22-fa8f82aaa475\",\r\n    \"totalAmount\": 29999.00,\r\n    \"orderDate\": \"2024-08-27T05:38:49.85\",\r\n    \"status\": \"Processing\",\r\n    \"shippingAddressID\": \"a1e73be4-7394-487f-7b78-08dcc65af829\",\r\n    \"billingAddressID\": \"806376a1-7006-4d67-7b79-08dcc65af829\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/Orders/Update/901d347c-3cd1-427c-2a9a-08dcc65b9a0e",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Orders",
+						"Update",
+						"901d347c-3cd1-427c-2a9a-08dcc65b9a0e"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/Orders/Delete/d1f85e87-7c6f-47f0-2a9b-08dcc65b9a0e",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Orders",
+						"Delete",
+						"d1f85e87-7c6f-47f0-2a9b-08dcc65b9a0e"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

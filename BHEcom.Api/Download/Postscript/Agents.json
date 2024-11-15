@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "a7efb741-283a-4567-8235-081018a5cdf5",
+		"name": "Agents",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37791426",
+		"_collection_link": "https://bh5555.postman.co/workspace/Bh~2457ee2d-f2ae-4c5b-8f57-74219f3cd44a/collection/37791426-a7efb741-283a-4567-8235-081018a5cdf5?action=share&source=collection_link&creator=37791426"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"userID\": \"EB122A88-15E5-4D5B-AD22-FA8F82AAA475\",\r\n  \"agencyName\": \"Dhaka Travels 22\",\r\n  \"contactPerson\": \"Md. Rakib Hasan\",\r\n  \"contactEmail\": \"rakib.hasan@dhakatravels.com\",\r\n  \"contactPhone\": \"+8801712345678\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/Agents/Create",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Agents",
+						"Create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAll",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/Agents/GetAll",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Agents",
+						"GetAll"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetById",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://localhost:7203/api/Agents/GetById/d0d17653-408b-4110-4afd-08dcc64e7377",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Agents",
+						"GetById",
+						"d0d17653-408b-4110-4afd-08dcc64e7377"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"agentID\": \"d0d17653-408b-4110-4afd-08dcc64e7377\",\r\n    \"userID\": \"eb122a88-15e5-4d5b-ad22-fa8f82aaa475\",\r\n    \"agencyName\": \"Rakib Electronic\",\r\n    \"contactPerson\": \"Md. Rakib Hasan\",\r\n    \"contactEmail\": \"rakib.hasan@electronic.bd\",\r\n    \"contactPhone\": \"+8801712345678\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7203/api/Agents/Update/d0d17653-408b-4110-4afd-08dcc64e7377",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Agents",
+						"Update",
+						"d0d17653-408b-4110-4afd-08dcc64e7377"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7203/api/Agents/Delete/76127fba-71df-4251-4afe-08dcc64e7377",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7203",
+					"path": [
+						"api",
+						"Agents",
+						"Delete",
+						"76127fba-71df-4251-4afe-08dcc64e7377"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
