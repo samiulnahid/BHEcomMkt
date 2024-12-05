@@ -28,12 +28,12 @@ namespace BHEcom.Services.Implementations
         {
             return await _addressRepository.GetByIdAsync(id);
         }
-         public async Task<Address> GetAddressByUserIdAsync(Guid id)
+         public async Task<Address?> GetAddressByUserIdAsync(Guid id)
         {
             return await _addressRepository.GetByUserIdAsync(id);
         }
 
-        public async Task<bool> AddAddressAsync(Address address)
+        public async Task<Guid> AddAddressAsync(Address address)
         {
            return await _addressRepository.AddAsync(address);
         }

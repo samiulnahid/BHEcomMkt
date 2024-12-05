@@ -28,14 +28,14 @@ namespace BHEcom.Services.Implementations
             return await _orderRepository.GetByIdAsync(id);
         }
 
-        public async Task AddOrderAsync(Order order)
+        public async Task<Guid> AddOrderAsync(Order order)
         {
-            await _orderRepository.AddAsync(order);
+            return await _orderRepository.AddAsync(order);
         }
 
-        public async Task UpdateOrderAsync(Order order)
+        public async Task<bool> UpdateOrderAsync(Guid orderId, string status)
         {
-            await _orderRepository.UpdateAsync(order);
+            return await _orderRepository.UpdateAsync(orderId, status);
         }
 
         public async Task DeleteOrderAsync(Guid id)

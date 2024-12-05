@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BHEcom.Services.Interfaces;
+using BHEcom.Services.Implementations;
+using System.ComponentModel.DataAnnotations;
 
 
 namespace BHEcom.Api.Controllers
@@ -16,10 +18,14 @@ namespace BHEcom.Api.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
+        private readonly IOrderDetailService _orderDetailService;
+        private readonly ICartService _cartService;
         private readonly ILogger<OrderRepository> _logger;
-        public OrdersController(IOrderService orderService, ILogger<OrderRepository> logger)
+        public OrdersController(IOrderService orderService, ICartService cartService, IOrderDetailService orderDetailService, ILogger<OrderRepository> logger)
         {
             _orderService = orderService;
+            _cartService = cartService;
+            _orderDetailService = orderDetailService;
             _logger = logger;
         }
 
@@ -39,6 +45,55 @@ namespace BHEcom.Api.Controllers
 
             }
         }
+
+
+        [HttpPost("CreateOrder")]
+        public async Task<ActionResult> CreateOrder([FromBody] Order model)
+        {
+            try
+            {
+               // if (order == null ||  order.CartProductList == null || !order.CartProductList.Any())
+                if (model == null ||model.CartID == null || model.CartID == Guid.Empty)
+                    return BadRequest(new { Success = false, Message = "Invalid data." });
+
+                Guid cartId = model.CartID ?? Guid.Empty;
+
+                var cartManager = await _cartService.GetCartManagerByCartIdAsync(cartId);
+                var allAmount = cartManager.Sum(item =>item.TotalPrice ?? 0);
+
+                model.TotalAmount = allAmount;
+                Guid orderId = await _orderService.AddOrderAsync(model);
+                if(orderId == Guid.Empty)
+                    return StatusCode(500, "Order Creation Failed!");
+
+                foreach (var item in cartManager)
+                {
+                    OrderDetail detail = new OrderDetail()
+                    {
+                        OrderID = orderId,
+                        ProductID = item.ProductID,
+                        Quantity = item.Quantity,
+                        Price = item.Price ?? 0,
+                    };
+                    Guid detailId = await _orderDetailService.AddOrderDetailAsync(detail);
+                    if (detailId == Guid.Empty)
+                        return StatusCode(500, "Order Details Creation Failed!");
+                }
+
+                return Ok(new { OrderId = orderId, Success = true, Message = "Successfully create order & order details." });
+
+
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, "An error occurred while adding a order.");
+                return StatusCode(500, ex.Message);
+
+            }
+        }
+
+
 
         [HttpGet("GetById/{id}")]
         public async Task<ActionResult<Order>> GetById(Guid id)
@@ -79,17 +134,20 @@ namespace BHEcom.Api.Controllers
         }
 
         [HttpPut("Update/{id}")]
-        public async Task<ActionResult> Update(Guid id, [FromBody] Order order)
+        public async Task<ActionResult> Update(Guid id, [FromBody] string status)
         {
             try
             {
-                if (id != order.OrderID)
+                if (id == Guid.Empty)
                 {
                     return BadRequest();
                 }
 
-                await _orderService.UpdateOrderAsync(order);
-                return NoContent();
+                bool isUpdated = await _orderService.UpdateOrderAsync(id, status);
+                if (!isUpdated)
+                    return Ok(new { Success = false, Message = "Order status update unsuccessful." });
+
+                return Ok(new { Success = true, Message = "Successfully updated order status." });
             }
             catch (Exception ex)
             {

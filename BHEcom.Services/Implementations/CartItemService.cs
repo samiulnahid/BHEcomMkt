@@ -28,19 +28,20 @@ namespace BHEcom.Services.Implementations
             return await _cartItemRepository.GetByIdAsync(id);
         }
 
-        public async Task AddCartItemAsync(CartItem cartItem)
+        public async Task<Guid> AddCartItemAsync(CartItem cartItem)
         {
-            await _cartItemRepository.AddAsync(cartItem);
+           return await _cartItemRepository.AddAsync(cartItem);
         }
 
-        public async Task UpdateCartItemAsync(CartItem cartItem)
+        public async Task<bool> UpdateCartItemAsync(CartItem cartItem)
         {
-            await _cartItemRepository.UpdateAsync(cartItem);
+           return await _cartItemRepository.UpdateAsync(cartItem);
         }
 
-        public async Task DeleteCartItemAsync(Guid id)
+        public async Task<bool> DeleteCartItemAsync(Guid id)
         {
-            await _cartItemRepository.DeleteAsync(id);
+           return await _cartItemRepository.DeleteAsync(id);
         }
+
     }
 }

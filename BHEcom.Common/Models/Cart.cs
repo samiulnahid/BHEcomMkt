@@ -14,10 +14,6 @@ namespace BHEcom.Common.Models
         public Guid UserID { get; set; } 
         public DateTime CreatedDate { get; set; }  
 
-        
-        public Cart()
-        {
-            
-        }
+       
     }
 }

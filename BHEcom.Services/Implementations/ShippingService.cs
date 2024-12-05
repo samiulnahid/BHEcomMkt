@@ -41,6 +41,10 @@ namespace BHEcom.Services.Implementations
         public async Task DeleteShippingAsync(Guid id)
         {
             await _shippingRepository.DeleteAsync(id);
+        } 
+        public async Task CreateOrUpdateAsync(Shipping shipping)
+        {
+            await _shippingRepository.CreateOrUpdateAsync(shipping);
         }
     }
 

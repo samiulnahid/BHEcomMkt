@@ -11,8 +11,8 @@ namespace BHEcom.Services.Interfaces
     {
         Task<IEnumerable<Order>> GetAllOrdersAsync();
         Task<Order> GetOrderByIdAsync(Guid id);
-        Task AddOrderAsync(Order order);
-        Task UpdateOrderAsync(Order order);
+        Task<Guid> AddOrderAsync(Order order);
+        Task<bool> UpdateOrderAsync(Guid orderId, string status);
         Task DeleteOrderAsync(Guid id);
     }
 }

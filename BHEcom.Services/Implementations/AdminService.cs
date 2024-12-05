@@ -20,7 +20,7 @@ namespace BHEcom.Services.Implementations
             _adminRepository = adminRepository;
         }
 
-        public async Task<IdentityResult> RegisterAsync(Useres model)
+        public async Task<IdentityResult> RegisterAsync(User model)
         {
             var result = await _adminRepository.RegisterAsync(model);
             return result;
@@ -32,11 +32,15 @@ namespace BHEcom.Services.Implementations
         public async Task<Guid> CreateUserAsync(User model, string roleName, string email)
         {
             //return await _adminRepository.AddAsync(model, roleName, email); 
-            return await _adminRepository.CreateUserAndAssignRoleAsync(model, roleName, email);
+            return await _adminRepository.RegisterAsyncMembership(model, roleName, email);
         }
         public async Task<bool> UpdateUserNameAsync(User user)
         {
             return await _adminRepository.UpdateUserAsync(user);
+        }
+       public async Task<bool> CheckUserNameExistAsync(User user)
+       {
+            return await _adminRepository.CheckUserNameExistAsync(user);
         }
     
         public async Task<SignInResult> LoginAsync(string userName, string password)
@@ -60,6 +64,11 @@ namespace BHEcom.Services.Implementations
         public async Task<IdentityResult> DeleteUserAsync(Guid userId)
         {
             return await (_adminRepository.DeleteUserAsync(userId));
+        }
+
+       public async Task<(bool IsSuccess, Guid UserId, string RoleName)> ValidateUser(string userName, string password)
+        {
+            return await _adminRepository.ValidateUser(userName, password);
         }
 
       

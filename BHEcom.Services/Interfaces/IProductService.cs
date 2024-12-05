@@ -12,7 +12,8 @@ namespace BHEcom.Services.Interfaces
         Task<IEnumerable<Product>> GetAllProductsByStoreIdAsync(Guid id);
         Task<IEnumerable<Product>> GetAllProductsAsync();
         Task<IEnumerable<Product>> GetRandomProductsAsync(int num);
-       
+        Task<IEnumerable<Product>> GetLatestProductsAsync(int num);
+        Task<(IEnumerable<Product>? Products, int? TotalCount)> FilterAllProduct(ProductFilter filterEntity);
         Task<Product> GetProductByIdAsync(Guid id);
         Task<IEnumerable<Product>> GetProductByCategoryIdAsync(Guid id);
         Task<Guid> AddProductAsync(Product product);

@@ -67,5 +67,40 @@ namespace BHEcom.Data.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task CreateOrUpdateAsync(Shipping shipping)
+        {
+            try
+            {
+                var existingShipping = await _context.Shipping.FindAsync(shipping.ShippingID);
+                if (existingShipping != null)
+                {
+                    // Update existing record
+                    existingShipping.OrderID = shipping.OrderID;
+                    existingShipping.ShippingAddressID = shipping.ShippingAddressID;
+                    existingShipping.ShippingMethod = shipping.ShippingMethod;
+                    existingShipping.ShippingCost = shipping.ShippingCost;
+                    existingShipping.ShippingStatus = shipping.ShippingStatus;
+                    existingShipping.ShippedDate = shipping.ShippedDate;
+                    existingShipping.EstimatedDeliveryDate = shipping.EstimatedDeliveryDate;
+
+                    _context.Shipping.Update(existingShipping);
+                }
+                else
+                {
+                    // Create new record
+                    await _context.Shipping.AddAsync(shipping);
+                }
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception as needed
+                _logger.LogError(ex, "An error occurred while creating or updating a shipping.");
+                throw; // Re-throw the exception to ensure it's handled elsewhere
+            }
+        }
+
     }
 }

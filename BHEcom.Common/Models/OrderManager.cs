@@ -8,21 +8,18 @@ using System.Threading.Tasks;
 
 namespace BHEcom.Common.Models
 {
-    public class Order
+    public class OrderManager
     {
-        [Key]
-        public Guid OrderID { get; set; }
+        public Guid? OrderID { get; set; }
         public Guid? UserID { get; set; }
-
-        [Required]
-        [Column(TypeName = "decimal(18, 2)")]
-        public decimal TotalAmount { get; set; }
+        public decimal? TotalAmount { get; set; }
         public DateTime? OrderDate { get; set; }
-        public string Status { get; set; }
+        public string? Status { get; set; }
         public Guid? ShippingAddressID { get; set; }
         public Guid? BillingAddressID { get; set; }
+        public Guid CartID { get; set; }
 
-        [NotMapped]
-        public Guid? CartID { get; set; }
+
+      //  public IEnumerable<CartManager>? CartProductList { get; set; }
     }
 }

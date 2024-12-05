@@ -20,17 +20,18 @@ namespace BHEcom.Data.Repositories
             _logger = logger;
         }
 
-        public async Task AddAsync(Cart cart)
+        public async Task<Guid> AddAsync(Cart cart)
         {
             try
             {
                 await _context.Cart.AddAsync(cart);
                 await _context.SaveChangesAsync();
+                return cart.CartID;
             }
             catch (Exception ex)
             {
-
                _logger.LogError(ex, "An error occurred while adding a cart.");
+                return Guid.Empty;
             }
         }
 
@@ -44,29 +45,63 @@ namespace BHEcom.Data.Repositories
             return await  _context.Cart.ToListAsync();
         }
 
-        public async Task UpdateAsync(Cart cart)
+        public async Task<bool> UpdateAsync(Cart cart)
         {
             try
             {
                 _context.Cart.Update(cart);
                 await _context.SaveChangesAsync();
+                return true; // Return true if update succeeds
             }
             catch (Exception ex)
             {
 
                _logger.LogError(ex, "An error occurred while updating a cart.");
+                return false;
             }
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var cart = await _context.Cart.FindAsync(id);
             if (cart != null)
             {
                 _context.Cart.Remove(cart);
                 await _context.SaveChangesAsync();
+                return true;
             }
+            return false;
         }
+
+        public async Task<IEnumerable<CartManager>> GetCartItemsByUserIdAsync(Guid userId)
+        {
+
+            return await _context.vw_EcommerceCart
+                                       .Where(cart => cart.UserID == userId)
+                                       .ToListAsync();
+        }
+
+        public async Task ClearCartAsync(Guid cartId)
+        {
+            var cartItems = _context.CartItems.Where(ci => ci.CartID == cartId);
+            _context.CartItems.RemoveRange(cartItems);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<CartManager>> GetCartManagerByCartIdAsync(Guid cartId)
+        {
+            
+            //return await _context.vw_EcommerceCart
+            //                           .Where(cart => cart.CartItemID == cartId)
+            //                           .ToListAsync();
+
+            var cartItems = await _context.vw_EcommerceCart
+                                .Where(cm => cm.CartID == cartId)
+                                .ToListAsync();
+            return cartItems;
+        }
+
+
     }
 
 }

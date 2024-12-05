@@ -14,5 +14,6 @@ namespace BHEcom.Data.Repositories
         Task<IEnumerable<Shipping>> GetAllAsync();
         Task UpdateAsync(Shipping shipping);
         Task DeleteAsync(Guid id);
+        Task CreateOrUpdateAsync(Shipping shipping);
     }
 }

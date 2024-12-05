@@ -34,6 +34,23 @@ namespace BHEcom.Api.Controllers
             }
         }
 
+        [HttpPost("CreateOrUpdate")]
+        public async Task<ActionResult> CreateOrUpdate([FromBody] Shipping shipping)
+        {
+            try
+            {
+                await _shippingService.CreateOrUpdateAsync(shipping);
+                return Ok(new { success = true, message = "Shipping record created or updated successfully.", shipping });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while creating or updating a shipping.");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
+
         [HttpGet("GetById/{id}")]
         public async Task<ActionResult<Shipping>> GetById(Guid id)
         {

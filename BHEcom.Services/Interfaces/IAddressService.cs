@@ -11,8 +11,8 @@ namespace BHEcom.Services.Interfaces
     {
         Task<IEnumerable<Address>> GetAllAddressesAsync();
         Task<Address> GetAddressByIdAsync(Guid id);
-        Task<Address> GetAddressByUserIdAsync(Guid id);
-        Task<bool> AddAddressAsync(Address address);
+        Task<Address?> GetAddressByUserIdAsync(Guid id);
+        Task<Guid> AddAddressAsync(Address address);
         Task<bool> UpdateAddressAsync(Address address);
         Task<bool> DeleteAddressAsync(Guid id);
     }

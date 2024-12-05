@@ -32,7 +32,8 @@ namespace BHEcom.Api.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<ActionResult> Create([FromBody] Product product, [FromForm] IFormFile imageFile)
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> Create([FromForm] Product product, [FromForm] IFormFile imageFile)
         {
             try
             {
@@ -44,19 +45,32 @@ namespace BHEcom.Api.Controllers
                
                 if (imageFile != null && imageFile.Length > 0)
                 {
-                    var folderPath = Path.Combine(_environment.WebRootPath, "Gallery", "Product");
+                    var galleryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Gallery");
+                    var productPath = Path.Combine(galleryPath, "Product");
 
-                    if (!Directory.Exists(folderPath))
+                    //var productPath = Path.Combine(galleryPath, "Product");
+
+                    // Ensure "Gallery" folder exists
+                    if (!Directory.Exists(galleryPath))
                     {
-                        Directory.CreateDirectory(folderPath);
+                        Directory.CreateDirectory(galleryPath);
                     }
 
-                    // Generate a unique file name
-                    //var fileName = Path.GetFileNameWithoutExtension(imageFile.FileName);
-                    //var fileExtension = Path.GetExtension(imageFile.FileName);
+                    // Ensure "Product" folder exists
+                    if (!Directory.Exists(productPath))
+                    {
+                        Directory.CreateDirectory(productPath);
+                    }
+
+
+                    //if (!Directory.Exists(folderPath))
+                    //{
+                    //    Directory.CreateDirectory(folderPath);
+                    //}
                     string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
-                    var fullPath = Path.Combine(folderPath, uniqueFileName);
-                    
+                    var fullPath = Path.Combine(productPath, uniqueFileName);
+
+
                     // Save the file
                     using (var fileStream = new FileStream(fullPath, FileMode.Create))
                     {
@@ -64,27 +78,31 @@ namespace BHEcom.Api.Controllers
                     }
 
                     // Set the image path in the product object
-                    product.Image = Path.Combine("Gallery", "Product", Path.GetFileName(fullPath));
+                     product.Image = Path.Combine("Gallery", "Product", Path.GetFileName(fullPath)).Replace("\\", "/");
+
+
+                    //product.Image = Path.Combine("images", uniqueFileName).Replace("\\","/"); 
 
                     //if (imageFile != null && imageFile.Length > 0)
                     //{
-                        //string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
-                        //Directory.CreateDirectory(uploadsFolder); // Ensure directory exists
+                    //string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+                    //Directory.CreateDirectory(uploadsFolder); // Ensure directory exists
 
-                        // Generate a unique filename to avoid conflicts
-                        //string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
-                        //string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    // Generate a unique filename to avoid conflicts
+                    //string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
+                    //string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                        // Save the image to the specified local path
-                        //using (var fileStream = new FileStream(filePath, FileMode.Create))
-                        //{
-                           // await imageFile.CopyToAsync(fileStream);
-                       // }
+                    // Save the image to the specified local path
+                    //using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    //{
+                    // await imageFile.CopyToAsync(fileStream);
+                    // }
 
-                        // Set the product's Image property to the relative file path for database storage
-                        //product.Image = Path.Combine("images", uniqueFileName);
+                    // Set the product's Image property to the relative file path for database storage
+                    //product.Image = Path.Combine("images", uniqueFileName);
                     //}
                 }
+                product.CreatedDate = DateTime.Now;
                 Guid productId = await _productService.AddProductAsync(product);
                 return Ok(new {ProductId = productId , Success = true});
 
@@ -98,29 +116,6 @@ namespace BHEcom.Api.Controllers
             }
         }
 
-
-        [HttpPost("Createss")]
-        public async Task<ActionResult> Createss([FromBody] Product product)
-        {
-            try
-            {
-                if (product == null)
-                {
-                    return BadRequest("Product data is required.");
-                }
-
-                Guid productId = await _productService.AddProductAsync(product);
-                return Ok(new { ProductId = productId, Success = true });
-
-
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while adding a product.");
-                return StatusCode(500, ex.Message);
-            }
-        }
 
 
 
@@ -138,7 +133,16 @@ namespace BHEcom.Api.Controllers
                 // Append base URL to image path if needed
                 if (!string.IsNullOrEmpty(product.Image))
                 {
-                    product.Image = $"{Request.Scheme}://{Request.Host}/{product.Image}";
+                    //product.Image = $"{Request.Scheme}://{Request.Host}/{product.Image}";
+                    var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", product.Image.Replace("/", Path.DirectorySeparatorChar.ToString()));
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        product.Image = $"{Request.Scheme}://{Request.Host}/{product.Image}";
+                    }
+                    else
+                    {
+                        product.Image = $"{Request.Scheme}://{Request.Host}/images/default-product.jpg"; // Default image URL
+                    }
                 }
 
                 return Ok(product);
@@ -153,7 +157,7 @@ namespace BHEcom.Api.Controllers
 
 
         [HttpGet("GetByCategoryId/{id}")]
-        public async Task<ActionResult<Product>> GetByCategoryId(Guid id)
+        public async Task<ActionResult<List<Product>>> GetByCategoryId(Guid id)
         {
             try
             {
@@ -164,7 +168,7 @@ namespace BHEcom.Api.Controllers
                 }
                 var result = GenerateProductObjectList(product);
 
-                return Ok(result);
+                return Ok(product);
 
             }
             catch (Exception ex)
@@ -175,23 +179,15 @@ namespace BHEcom.Api.Controllers
         }
 
 
-        [HttpGet("GetAll/{id}")]
-        public async Task<ActionResult<List<object>>> GetAll()
+        [HttpGet("GetAll")]
+        public async Task<ActionResult<List<Product>>> GetAll()
         {
             try
             {
                 var products = await _productService.GetAllProductsAsync();
 
-                // Update each product's image path to be a full URL
-                //foreach (var product in products)
-                //{
-                //    if (!string.IsNullOrEmpty(product.Image))
-                //    {
-                //        product.Image = $"{Request.Scheme}://{Request.Host}/{product.Image}";
-                //    }
-                //}
-                var result = GenerateProductObjectList(products);
-                return Ok(result);
+                //var result = GenerateProductObjectList(products);
+                return Ok(products);
 
             }
             catch (Exception ex)
@@ -202,14 +198,14 @@ namespace BHEcom.Api.Controllers
         }
 
         [HttpGet("GetByStoreId/{id}")]
-        public async Task<ActionResult<List<object>>> GetByStoreId(Guid id)
+        public async Task<ActionResult<List<Product>>> GetByStoreId(Guid id)
         {
             try
             {
                 var products = await _productService.GetAllProductsByStoreIdAsync(id);
 
                 var result = GenerateProductObjectList(products);
-                return Ok(result);
+                return Ok(products);
             }
             catch (Exception ex)
             {
@@ -220,7 +216,7 @@ namespace BHEcom.Api.Controllers
 
 
         [HttpPut("Update/{id}")]
-        public async Task<ActionResult> Update(Guid id, [FromForm] Product product, [FromForm] IFormFile imageFile)
+        public async Task<ActionResult> Update(Guid id, [FromForm] Product product)
         {
             try
             {
@@ -229,34 +225,34 @@ namespace BHEcom.Api.Controllers
                     return BadRequest("Product ID mismatch.");
                 }
 
-                // Check if a new image file is provided
-                if (imageFile != null && imageFile.Length > 0)
-                {
-                    // Remove the old image if it exists
-                    if (!string.IsNullOrEmpty(product.Image))
-                    {
-                        string oldImagePath = Path.Combine("wwwroot", product.Image);
-                        if (System.IO.File.Exists(oldImagePath))
-                        {
-                            System.IO.File.Delete(oldImagePath);
-                        }
-                    }
+                //// Check if a new image file is provided
+                //if (imageFile != null && imageFile.Length > 0)
+                //{
+                //    // Remove the old image if it exists
+                //    if (!string.IsNullOrEmpty(product.Image))
+                //    {
+                //        string oldImagePath = Path.Combine("wwwroot", product.Image);
+                //        if (System.IO.File.Exists(oldImagePath))
+                //        {
+                //            System.IO.File.Delete(oldImagePath);
+                //        }
+                //    }
 
-                    // Save the new image
-                    string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
-                    Directory.CreateDirectory(uploadsFolder);
+                //    // Save the new image
+                //    string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+                //    Directory.CreateDirectory(uploadsFolder);
 
-                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
-                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                //    string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
+                //    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await imageFile.CopyToAsync(fileStream);
-                    }
+                //    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                //    {
+                //        await imageFile.CopyToAsync(fileStream);
+                //    }
 
-                    // Update the product's Image property with the new image path
-                    product.Image = Path.Combine("images", uniqueFileName);
-                }
+                //    // Update the product's Image property with the new image path
+                //    product.Image = Path.Combine("images", uniqueFileName);
+                //}
 
                 await _productService.UpdateProductAsync(product);
                 return Ok("Successfully Updated");
@@ -326,7 +322,7 @@ namespace BHEcom.Api.Controllers
         }
 
         [HttpGet("GetProductFieldsByCategoryId/{id}")]
-        public async Task<ActionResult<Category>> GetProductFieldsByCategoryId(Guid id)
+        public async Task<ActionResult<StoreProductField>> GetProductFieldsByCategoryId(Guid id)
         {
             var subCategories = await _storeService.GetProductFieldsByCategoryId(id);
 
@@ -416,7 +412,7 @@ namespace BHEcom.Api.Controllers
         //[HttpGet("GetRendomProductId/{num}")]
         //public async Task<ActionResult<Product>> GetRandomProduct(int num)
         //{
-        //    try 
+        //    try
         //    {
 
         //    }
@@ -429,7 +425,7 @@ namespace BHEcom.Api.Controllers
         //}
 
         [HttpGet("GetRandomProduct/{num}")]
-        public async Task<ActionResult<List<object>>> GetRandomProduct(int num)
+        public async Task<ActionResult<List<Product>>> GetRandomProduct(int num)
         {
             try
             {
@@ -437,7 +433,26 @@ namespace BHEcom.Api.Controllers
                 var products = await _productService.GetRandomProductsAsync(num);
                 var result = GenerateProductObjectList(products);
 
-                return Ok(result);
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving random products.");
+                return StatusCode(500, "An error occurred while retrieving products.");
+            }
+        }
+
+
+        [HttpGet("GetLatestProduct/{num}")]
+        public async Task<ActionResult<List<Product>>> GetLatestProduct(int num)
+        {
+            try
+            {
+
+                var products = await _productService.GetLatestProductsAsync(num);
+                var result = GenerateProductObjectList(products);
+
+                return Ok(products);
             }
             catch (Exception ex)
             {
@@ -480,6 +495,33 @@ namespace BHEcom.Api.Controllers
             }
             return result;
         }
+
+        [HttpPost("FilterProduct")]
+        public async Task<ActionResult<List<Product>>> FilterProduct(ProductFilter filterEntity)
+        {
+            try
+            {
+                var (products, totalCount) = await _productService.FilterAllProduct(filterEntity);
+                if (products != null && totalCount != null)
+                {
+                    if (totalCount == 0)
+                    {
+                        return Ok(new { Products = new List<Product>(), totalPage = 0 });
+                    }
+                    var result = GenerateProductObjectList(products);
+                    int totalPages = (int)Math.Ceiling((double)totalCount / filterEntity.PageSize);
+                    return Ok(new { Products = products, totalPage = totalPages });
+                }
+
+                return StatusCode(500, "An error occurred while retrieving products.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving random products.");
+                return StatusCode(500, "An error occurred while retrieving products.");
+            }
+        }
+
 
     }
 }

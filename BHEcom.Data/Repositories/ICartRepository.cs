@@ -9,11 +9,15 @@ namespace BHEcom.Data.Repositories
 {
     public interface ICartRepository
     {
-        Task AddAsync(Cart cart);
+        Task<Guid> AddAsync(Cart cart);
         Task<Cart> GetByIdAsync(Guid id);
         Task<IEnumerable<Cart>> GetAllAsync();
-        Task UpdateAsync(Cart cart);
-        Task DeleteAsync(Guid id);
+        Task<bool> UpdateAsync(Cart cart);
+        Task<bool> DeleteAsync(Guid id);
+        Task<IEnumerable<CartManager>> GetCartItemsByUserIdAsync(Guid userId);
+        Task ClearCartAsync(Guid cartId);
+        Task<List<CartManager>> GetCartManagerByCartIdAsync(Guid cartId);
+
     }
 
 }

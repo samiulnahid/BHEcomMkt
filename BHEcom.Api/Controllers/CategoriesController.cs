@@ -43,6 +43,7 @@ namespace BHEcom.Api.Controllers
         {
             try
             {
+                category.CreatedDate = DateTime.Now;
                 await _categoryService.AddCategoryAsync(category);
                 return CreatedAtAction(nameof(GetById), new { id = category.CategoryID }, category);
             }
@@ -87,6 +88,7 @@ namespace BHEcom.Api.Controllers
                 {
                     return BadRequest();
                 }
+                category.ModifiedDate = DateTime.Now;
                 await _categoryService.UpdateCategoryAsync(category);
                 return Ok(new { Message = "Successfully Updated", Success = true });
             }

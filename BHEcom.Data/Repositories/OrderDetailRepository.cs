@@ -19,17 +19,18 @@ namespace BHEcom.Data.Repositories
             _logger = logger;
         }
 
-        public async Task AddAsync(OrderDetail orderDetail)
+        public async Task<Guid> AddAsync(OrderDetail orderDetail)
         {
             try
             {
                 await _context.OrderDetails.AddAsync(orderDetail);
                 await _context.SaveChangesAsync();
+                return orderDetail.OrderDetailID;
             }
             catch (Exception ex)
             {
-
                _logger.LogError(ex, "An error occurred while adding a orderDetail.");
+                return Guid.Empty;
             }
         }
 

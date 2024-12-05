@@ -20,17 +20,19 @@ namespace BHEcom.Data.Repositories
             _logger = logger;
         }
 
-        public async Task AddAsync(CartItem cartItem)
+        public async Task<Guid> AddAsync(CartItem cartItem)
         {
             try
             {
                 await _context.CartItems.AddAsync(cartItem);
                 await _context.SaveChangesAsync();
+                return cartItem.CartItemID;
             }
             catch (Exception ex)
             {
 
                _logger.LogError(ex, "An error occurred while adding a cartItem.");
+                return Guid.Empty;  
             }
         }
 
@@ -44,28 +46,32 @@ namespace BHEcom.Data.Repositories
             return await _context.CartItems.ToListAsync();
         }
 
-        public async Task UpdateAsync(CartItem cartItem)
+        public async Task<bool> UpdateAsync(CartItem cartItem)
         {
             try
             {
                 _context.CartItems.Update(cartItem);
                 await _context.SaveChangesAsync();
+                return true;
             }
             catch (Exception ex)
             {
 
                _logger.LogError(ex, "An error occurred while updating a cartItem.");
+                return false;
             }
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var cartItem = await _context.CartItems.FindAsync(id);
             if (cartItem != null)
             {
                 _context.CartItems.Remove(cartItem);
                 await _context.SaveChangesAsync();
+                return true;
             }
+            return false;   
         }
     }
 

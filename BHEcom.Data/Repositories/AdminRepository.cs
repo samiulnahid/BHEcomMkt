@@ -251,7 +251,7 @@ namespace BHEcom.Data.Repositories
 
                 useres.UserId = user.UserId;
                 useres.UserName = user.UserName;
-                useres.ApplicationId = user.ApplicationId;
+               // useres.ApplicationId = user.ApplicationId;
                 useres.CreateDate = user.LastActivityDate;
 
 
@@ -301,7 +301,7 @@ namespace BHEcom.Data.Repositories
                 var useresList = allUsers.Select(u => new Useres
                 {
                     UserId = u.UserId,
-                    ApplicationId = u.ApplicationId,
+                   // ApplicationId = u.ApplicationId,
                     UserName = u.UserName,
                     LoginDate = u.LastActivityDate,
                     Password = string.Empty,

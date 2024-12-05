@@ -20,17 +20,18 @@ namespace BHEcom.Data.Repositories
             _logger = logger;
         }
 
-        public async Task AddAsync(Order order)
+        public async Task<Guid> AddAsync(Order order)
         {
             try
             {
                 await _context.Orders.AddAsync(order);
                 await _context.SaveChangesAsync();
+                return order.OrderID;
             }
             catch (Exception ex)
             {
-
                _logger.LogError(ex, "An error occurred while adding a order.");
+                return Guid.Empty;
             }
         }
 
@@ -44,18 +45,24 @@ namespace BHEcom.Data.Repositories
             return await _context.Orders.ToListAsync();
         }
 
-        public async Task UpdateAsync(Order order)
+        public async Task<bool> UpdateAsync(Guid orderId, string status)
         {
-            try
-            {
-                _context.Orders.Update(order);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
+            //_context.Orders.Update(order);
+            //await _context.SaveChangesAsync();
 
-               _logger.LogError(ex, "An error occurred while updating a order.");
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order == null)
+            {
+                _logger.LogWarning("Order with ID {OrderId} not found.", orderId);
+                return false;
             }
+
+            order.Status = status; // Update only the Status field
+            _context.Entry(order).Property(o => o.Status).IsModified = true;
+
+            await _context.SaveChangesAsync();
+            return true;    
+
         }
 
         public async Task DeleteAsync(Guid id)

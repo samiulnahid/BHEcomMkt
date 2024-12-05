@@ -9,10 +9,10 @@ namespace BHEcom.Data.Repositories
 {
     public interface IOrderRepository
     {
-        Task AddAsync(Order order);
+        Task<Guid> AddAsync(Order order);
         Task<Order> GetByIdAsync(Guid id);
         Task<IEnumerable<Order>> GetAllAsync();
-        Task UpdateAsync(Order order);
+        Task<bool> UpdateAsync(Guid orderId, string status);
         Task DeleteAsync(Guid id);
     }
 

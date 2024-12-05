@@ -9,11 +9,11 @@ namespace BHEcom.Data.Repositories
 {
     public interface ICartItemRepository
     {
-        Task AddAsync(CartItem cartItem);
+        Task<Guid> AddAsync(CartItem cartItem);
         Task<CartItem> GetByIdAsync(Guid id);
         Task<IEnumerable<CartItem>> GetAllAsync();
-        Task UpdateAsync(CartItem cartItem);
-        Task DeleteAsync(Guid id);
+        Task<bool> UpdateAsync(CartItem cartItem);
+        Task<bool> DeleteAsync(Guid id);
     }
 
 }

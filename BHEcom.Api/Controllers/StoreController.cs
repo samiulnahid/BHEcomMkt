@@ -46,9 +46,9 @@ namespace BHEcom.Api.Controllers
                 string email = stores.ContactEmail; 
                 string roleName = "StoreAdmin";
 
-                Guid result = await _adminService.RegisterAsyncMembership(user, roleName, stores.ContactEmail);
+                Guid userId = await _adminService.RegisterAsyncMembership(user, roleName, stores.ContactEmail);
 
-                Guid userId = await _adminService.CreateUserAsync(user, roleName, email);
+                //Guid userId = await _adminService.CreateUserAsync(user, roleName, email);
                 Store store = new Store();
                 if (userId != Guid.Empty) {
                     
@@ -61,7 +61,7 @@ namespace BHEcom.Api.Controllers
                         ZipCode = stores.ZipCode,
                         Country = stores.Country,   
                     };
-                    bool isAddressCreated = await _addressService.AddAddressAsync(address);
+                    var addressId = await _addressService.AddAddressAsync(address);
 
                     Agent agent = new Agent
                     {

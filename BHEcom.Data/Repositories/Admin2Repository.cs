@@ -58,7 +58,7 @@ namespace BHEcom.Data.Repositories
             var application = await _context.Applications.OrderBy(a => a.ApplicationId).FirstOrDefaultAsync();
             if (application == null)
             {
-                return Guid.NewGuid();
+                return Guid.Empty;
                 
             }
 
@@ -145,14 +145,14 @@ namespace BHEcom.Data.Repositories
                 catch (Exception ex)
                 {
                     // Log the error and return failure result
-                    return Guid.NewGuid();
+                    return Guid.Empty;
                 }
             }
         }
 
 
 
-        public async Task<IdentityResult> RegisterAsync(Useres model)
+        public async Task<IdentityResult> RegisterAsync(User model)
         {
             var user = new IdentityUser
             {
@@ -366,6 +366,16 @@ namespace BHEcom.Data.Repositories
                 return false; // Return false in case of an exception
             }
         }
+        public async Task<bool> CheckUserNameExistAsync(User user)
+        {
+                // Check if a user with the same UserName exists, excluding the current user
+                var userNameExists = await _context.Users
+                    .AnyAsync(u => u.UserName == user.UserName || u.LoweredUserName == user.LoweredUserName);
+
+                // Return true if UserName exists, otherwise false
+                return userNameExists;
+          
+        }
 
         private string GenerateRandomPassword()
         {
@@ -399,6 +409,7 @@ namespace BHEcom.Data.Repositories
             return role?.RoleId ?? Guid.Empty;
         }
 
+
         //public async Task<Guid> CreateUserAndAssignRoleAsync(User user, string roleName, string email)
         //{
         //    try
@@ -410,32 +421,40 @@ namespace BHEcom.Data.Repositories
 
         //        if (application != null)
         //        {
-        //            string password = GenerateRandomPassword();
+        //            var (hashedPassword, salt, plainPassword) = CreateRandomHashedPassword();
+
         //            // Prepare other parameters
         //            var parameters = new[]
         //            {
         //                new SqlParameter("@ApplicationName", application.ApplicationName),
-        //                new SqlParameter("@ApplicationId", application.ApplicationId),
         //                new SqlParameter("@UserName", user.UserName),
-        //                new SqlParameter("@Password", password),            
+        //                new SqlParameter("@Password", plainPassword),
+        //                new SqlParameter("@PasswordSalt", salt),
         //                new SqlParameter("@Email", email),
-        //                new SqlParameter("@LoweredEmail", email.ToLower()),
+        //                new SqlParameter("@PasswordQuestion", DBNull.Value),
+        //                new SqlParameter("@PasswordAnswer", DBNull.Value),
         //                new SqlParameter("@IsApproved", true),
-        //                new SqlParameter("@IsLockedOut", false),
-        //                new SqlParameter("@CreateDate",  DateTime.UtcNow),
         //                new SqlParameter("@CurrentTimeUtc", DateTime.UtcNow),
-
+        //                //new SqlParameter("@CreateDate", DateTime.UtcNow),
+        //                new SqlParameter("@UniqueEmail", 1),
+        //                new SqlParameter("@PasswordFormat", 0), // Added @PasswordFormat parameter
+        //                new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Direction = ParameterDirection.Output }
         //            };
-
 
         //            // Execute the stored procedure
         //            await _context.Database.ExecuteSqlRawAsync(
         //                "EXEC [dbo].[aspnet_Membership_CreateUser] " +
-        //                "@ApplicationName,@ApplicationId, @UserName, @Password, @Email," +
-        //                "@LoweredEmail, @IsApproved, @IsLockedOut, @CurrentTimeUtc, @CreateDate OUTPUT ",
+        //                "@ApplicationName, @UserName, @Password, @PasswordSalt, @Email, " +
+        //                "@PasswordQuestion, @PasswordAnswer, @IsApproved, @CurrentTimeUtc,  " +
+        //                "@UniqueEmail, @PasswordFormat, @UserId OUTPUT",
         //                parameters
         //            );
+
+        //            // Retrieve the output UserId
+        //            var userId = (Guid)parameters.First(p => p.ParameterName == "@UserId").Value;
+        //            return userId;
         //        }
+
         //        return Guid.Empty;
         //    }
         //    catch (Exception)
@@ -444,60 +463,53 @@ namespace BHEcom.Data.Repositories
         //    }
         //}
 
-
-        public async Task<Guid> CreateUserAndAssignRoleAsync(User user, string roleName, string email)
+        public async Task<(bool IsSuccess, Guid UserId, string RoleName)> ValidateUser(string userName, string password)
         {
-            try
+            var user = await _context.Users
+                                    .FirstOrDefaultAsync(u => u.LoweredUserName == userName.ToLower());
+            if (user == null || user.UserId == Guid.Empty)
+                return (false, Guid.Empty, string.Empty);
+
+            var membership = await _context.Memberships
+                                            .FirstOrDefaultAsync(m => m.UserId == user.UserId);
+
+            if (membership == null || !membership.IsApproved || membership.IsLockedOut)
+                return (false, Guid.Empty, string.Empty);
+
+            var hashedPassword = HashPassword(password, membership.PasswordSalt ?? string.Empty); // Assume a password hashing method.
+            if (membership.Password != hashedPassword)
+                return (false, Guid.Empty, string.Empty);
+
+            var userRole =await (from ur in _context.UsersInRoles
+                            join r in _context.Roles on ur.RoleId equals r.RoleId
+                            where ur.UserId == user.UserId
+                            select r.RoleName).FirstOrDefaultAsync();
+
+            if (userRole == null)
+                return (false, Guid.Empty, string.Empty);
+
+            await UpdateLastActivityDateAsync(user.UserId);
+
+            return (true, user.UserId, userRole);
+        }
+
+
+        private async Task UpdateLastActivityDateAsync(Guid userId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user != null)
             {
-                // Retrieve the top 1 Application from the Applications table
-                var application = await _context.Applications
-                                                .OrderBy(a => a.ApplicationId)
-                                                .FirstOrDefaultAsync();
-
-                if (application != null)
-                {
-                    var (hashedPassword, salt, plainPassword) = CreateRandomHashedPassword();
-
-                    // Prepare other parameters
-                    var parameters = new[]
-                    {
-                        new SqlParameter("@ApplicationName", application.ApplicationName),
-                        new SqlParameter("@UserName", user.UserName),
-                        new SqlParameter("@Password", plainPassword),
-                        new SqlParameter("@PasswordSalt", salt),
-                        new SqlParameter("@Email", email),
-                        new SqlParameter("@PasswordQuestion", DBNull.Value),
-                        new SqlParameter("@PasswordAnswer", DBNull.Value),
-                        new SqlParameter("@IsApproved", true),
-                        new SqlParameter("@CurrentTimeUtc", DateTime.UtcNow),
-                        //new SqlParameter("@CreateDate", DateTime.UtcNow),
-                        new SqlParameter("@UniqueEmail", 1),
-                        new SqlParameter("@PasswordFormat", 0), // Added @PasswordFormat parameter
-                        new SqlParameter("@UserId", SqlDbType.UniqueIdentifier) { Direction = ParameterDirection.Output }
-                    };
-
-                    // Execute the stored procedure
-                    await _context.Database.ExecuteSqlRawAsync(
-                        "EXEC [dbo].[aspnet_Membership_CreateUser] " +
-                        "@ApplicationName, @UserName, @Password, @PasswordSalt, @Email, " +
-                        "@PasswordQuestion, @PasswordAnswer, @IsApproved, @CurrentTimeUtc,  " +
-                        "@UniqueEmail, @PasswordFormat, @UserId OUTPUT",
-                        parameters
-                    );
-
-                    // Retrieve the output UserId
-                    var userId = (Guid)parameters.First(p => p.ParameterName == "@UserId").Value;
-                    return userId;
-                }
-
-                return Guid.Empty;
-            }
-            catch (Exception)
-            {
-                return Guid.Empty;
+                user.LastActivityDate = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
             }
         }
 
+
+        //private string HashPassword(string password, string salt)
+        //{
+        //    // Implement your hashing logic here.
+        //    return password + salt; // Example only; use a proper hashing algorithm like HMACSHA256.
+        //}
 
         public static (string hashedPassword, string salt, string plainPassword) CreateRandomHashedPassword()
         {
@@ -539,6 +551,8 @@ namespace BHEcom.Data.Repositories
             }
             return passwordBuilder.ToString();
         }
+
+       
     }
 }
 

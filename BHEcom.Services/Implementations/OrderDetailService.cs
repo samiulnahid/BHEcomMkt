@@ -28,9 +28,9 @@ namespace BHEcom.Services.Implementations
             return await _orderDetailRepository.GetByIdAsync(id);
         }
 
-        public async Task AddOrderDetailAsync(OrderDetail orderDetail)
+        public async Task<Guid> AddOrderDetailAsync(OrderDetail orderDetail)
         {
-            await _orderDetailRepository.AddAsync(orderDetail);
+           return await _orderDetailRepository.AddAsync(orderDetail);
         }
 
         public async Task UpdateOrderDetailAsync(OrderDetail orderDetail)

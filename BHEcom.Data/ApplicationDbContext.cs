@@ -48,6 +48,7 @@ namespace BHEcom.Data
         public DbSet<StoreProductField> StoreProductFields { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UsersInRole> UsersInRoles { get; set; }
+        public DbSet<CartManager> vw_EcommerceCart { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -58,6 +59,9 @@ namespace BHEcom.Data
             // Define composite No primary key for UsersInRole
             modelBuilder.Entity<UsersInRole>().HasNoKey();
 
+            // Map the view to the CartItemViewModel
+            modelBuilder.Entity<CartManager>().HasNoKey(); // Views don't have a primary key
+            modelBuilder.Entity<CartManager>().ToView("vw_EcommerceCart"); // Replace with your actual view name
 
             modelBuilder.Entity<IdentityUser>(b =>
             {

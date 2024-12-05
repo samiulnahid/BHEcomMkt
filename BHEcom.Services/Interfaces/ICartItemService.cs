@@ -11,8 +11,8 @@ namespace BHEcom.Services.Interfaces
     {
         Task<IEnumerable<CartItem>> GetAllCartItemsAsync();
         Task<CartItem> GetCartItemByIdAsync(Guid id);
-        Task AddCartItemAsync(CartItem cartItem);
-        Task UpdateCartItemAsync(CartItem cartItem);
-        Task DeleteCartItemAsync(Guid id);
+        Task<Guid> AddCartItemAsync(CartItem cartItem);
+        Task<bool> UpdateCartItemAsync(CartItem cartItem);
+        Task<bool> DeleteCartItemAsync(Guid id);
     }
 }

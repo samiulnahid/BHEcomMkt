@@ -30,7 +30,15 @@ namespace BHEcom.Services.Implementations
         {
             return await _productRepository.GetRandomProductsAsync(num);
         }
-        
+         public async Task<IEnumerable<Product>> GetLatestProductsAsync(int num)
+        {
+            return await _productRepository.GetLatestProductsAsync(num);
+        }
+
+        public async Task<(IEnumerable<Product>? Products, int? TotalCount)> FilterAllProduct(ProductFilter filterEntity)
+        {
+            return await _productRepository.FilterAllProduct(filterEntity);
+        }
 
         public async Task<Product> GetProductByIdAsync(Guid id)
         {

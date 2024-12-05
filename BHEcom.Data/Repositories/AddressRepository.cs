@@ -23,19 +23,19 @@ namespace BHEcom.Data.Repositories
             _logger = logger;
         }
 
-        public async Task<bool> AddAsync(Address address)
+        public async Task<Guid> AddAsync(Address address)
         {
             try
             {
                 await _context.Addresses.AddAsync(address);
-                int affectedRows = await _context.SaveChangesAsync();
-                return affectedRows > 0;
+                await _context.SaveChangesAsync();
+                return address.AddressID;
             }
             catch (Exception ex)
             {
 
                _logger.LogError(ex, "An error occurred while adding a address.");
-                return false;
+                return Guid.Empty;
             }
         }
 
@@ -62,13 +62,15 @@ namespace BHEcom.Data.Repositories
 
             return result;
         }
-         public async Task<Address> GetByUserIdAsync(Guid id)
+        public async Task<Address?> GetByUserIdAsync(Guid id)
         {
             var result = await (from address in _context.Addresses
                                 join user in _context.Users
                                 on address.UserID equals user.UserId into addressUserGroup
                                 from user in addressUserGroup.DefaultIfEmpty() 
                                 where address.UserID == id
+                                && address.AddressType != null 
+                                && address.AddressType.Equals("Billing", StringComparison.OrdinalIgnoreCase)
                                 select new Address
                                 {
                                     AddressID = address.AddressID,

@@ -25,15 +25,13 @@ namespace BHEcom.Api.Controllers
         {
             try
             {
-                bool isCreated = await _addressService.AddAddressAsync(address);
-                if (isCreated) 
-                    return CreatedAtAction(nameof(GetById), new { id = address.AddressID }, address);
-                
-                else
+                var id = await _addressService.AddAddressAsync(address);
+                if (id == Guid.Empty)
                 {
-                   ResponseModel responseModel = new ResponseModel { Code = HandleResponse.ErrorCode, Message = HandleResponse.InsertionFailed };
-                   return Ok(responseModel);
+                    ResponseModel responseModel = new ResponseModel { Code = HandleResponse.ErrorCode, Message = HandleResponse.InsertionFailed };
+                    return Ok(responseModel);
                 }
+                return Ok(new { id = id, Success = true , Massage = "Create successfully." });
                 
             }
             catch (Exception ex)
@@ -42,7 +40,8 @@ namespace BHEcom.Api.Controllers
                 _logger.LogError(ex, "An error occurred while adding a address.");
                 return StatusCode(500, ex.Message);
             }
-        }
+        } 
+     
 
         [HttpGet("GetById/{id}")]
         public async Task<ActionResult<Address>> GetById(Guid id)
@@ -62,8 +61,8 @@ namespace BHEcom.Api.Controllers
                 _logger.LogError(ex, "An error occurred while getting a address.");
                 return StatusCode(500, ex.Message);
             }
-        }
-        
+        } 
+
         [HttpGet("GetByUserId/{id}")]
         public async Task<ActionResult<Address>> GetByUserId(Guid id)
         {
@@ -74,7 +73,7 @@ namespace BHEcom.Api.Controllers
                 {
                     return Ok(HandleResponse.EmptyData);
                 }
-                return Ok(address);
+                return Ok(new { address, Success = true });
             }
             catch (Exception ex)
             {

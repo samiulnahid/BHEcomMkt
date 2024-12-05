@@ -15,8 +15,11 @@ namespace BHEcom.Data.Repositories
         Task<IEnumerable<Product>> GetAllAsync();
         Task<IEnumerable<Product>> GetAllByStoreIdAsync(Guid id);
         Task<IEnumerable<Product>> GetRandomProductsAsync(int num);
+        Task<IEnumerable<Product>> GetLatestProductsAsync(int num);
         Task<bool> UpdateAsync(Product product);
         Task DeleteAsync(Guid id);
-        
+        Task<(IEnumerable<Product>? Products, int? TotalCount)> FilterAllProduct(ProductFilter filterEntity);
+
+
     }
 }
