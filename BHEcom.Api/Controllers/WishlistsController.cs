@@ -58,7 +58,7 @@ namespace BHEcom.Api.Controllers
             try
             {
                 var wishlists = await _wishlistService.GetAllWishlistsAsync();
-                return Ok(wishlists);
+                if (wishlists == null)
             }
             catch (Exception ex)
             {
