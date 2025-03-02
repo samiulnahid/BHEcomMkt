@@ -11,9 +11,13 @@ namespace BHEcom.Data.Repositories
     {
         Task<Guid> AddAsync(CartItem cartItem);
         Task<CartItem> GetByIdAsync(Guid id);
+       // Task<CartItem> GetByProductIdAsync(Guid id);
+        Task<CartItem> GetByCartandProductIdAsync(Guid cartId, Guid productId);
         Task<IEnumerable<CartItem>> GetAllAsync();
         Task<bool> UpdateAsync(CartItem cartItem);
         Task<bool> DeleteAsync(Guid id);
+
+        Task<(bool Success, string Message)> UpdateCartItemQuantityAsync(Guid cartItemId, string operation);
     }
 
 }

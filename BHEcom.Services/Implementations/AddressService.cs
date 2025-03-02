@@ -23,14 +23,18 @@ namespace BHEcom.Services.Implementations
         {
             return await _addressRepository.GetAllAsync();
         }
+           public async Task<IEnumerable<Address>> GetAllAddressesByUserId(Guid id)
+        {
+            return await _addressRepository.GetAllByUserIdAsync(id);
+        }
 
         public async Task<Address> GetAddressByIdAsync(Guid id)
         {
             return await _addressRepository.GetByIdAsync(id);
         }
-         public async Task<Address?> GetAddressByUserIdAsync(Guid id)
+         public async Task<Address?> GetAddressByUserIdAsync(Guid id, string type)
         {
-            return await _addressRepository.GetByUserIdAsync(id);
+            return await _addressRepository.GetByUserIdAsync(id, type);
         }
 
         public async Task<Guid> AddAddressAsync(Address address)

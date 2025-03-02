@@ -11,8 +11,11 @@ namespace BHEcom.Common.Models
     [Table("aspnet_UsersInRoles")]
     public class UsersInRole
     {
-        public Guid ApplicationId { get; set; }
+     
         public Guid UserId { get; set; }
         public Guid RoleId { get; set; }
+
+        [NotMapped]
+        public Guid? ApplicationId { get; set; }
     }
 }

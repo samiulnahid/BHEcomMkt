@@ -21,8 +21,13 @@ namespace BHEcom.Common.Models
         public string Status { get; set; }
         public Guid? ShippingAddressID { get; set; }
         public Guid? BillingAddressID { get; set; }
+        public decimal? DiscountAmount { get; set; }
+        public decimal? TotalAfterDiscount { get; set; }
+        public Guid? CouponId { get; set; }
+        public decimal TotalDeliveryFee { get; set; } = 0;
+        public string OrderNumber { get; set; }
 
         [NotMapped]
-        public Guid? CartID { get; set; }
+        public Guid CartID { get; set; }
     }
 }

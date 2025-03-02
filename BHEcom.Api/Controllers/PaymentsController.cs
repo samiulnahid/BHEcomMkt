@@ -2,6 +2,7 @@
 using BHEcom.Data.Repositories;
 using BHEcom.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -27,13 +28,13 @@ namespace BHEcom.Api.Controllers
             try
             {
                 await _paymentService.AddPaymentAsync(payment);
-                return CreatedAtAction(nameof(GetById), new { id = payment.PaymentID }, payment);
+                return Ok(new { id = payment.PaymentID, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while adding a payment.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -47,13 +48,13 @@ namespace BHEcom.Api.Controllers
                 {
                     return NotFound();
                 }
-                return Ok(payment);
+                return Ok(new { data = payment, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while getting a payment.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -63,13 +64,13 @@ namespace BHEcom.Api.Controllers
             try
             {
                 var payments = await _paymentService.GetAllPaymentsAsync();
-                return Ok(payments);
+                return Ok(new { data = payments, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while getting all payment.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -83,13 +84,13 @@ namespace BHEcom.Api.Controllers
                     return BadRequest();
                 }
                 await _paymentService.UpdatePaymentAsync(payment);
-                return NoContent();
+                return Ok(new { Message = "Successfully Updated", Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while updating a payment.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -99,13 +100,13 @@ namespace BHEcom.Api.Controllers
             try
             {
                 await _paymentService.DeletePaymentAsync(id);
-                return NoContent();
+                return Ok(new { Message = "Successfully Deleted", Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while deleting a payment.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
     }

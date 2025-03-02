@@ -14,5 +14,6 @@ namespace BHEcom.Data.Repositories
         Task<IEnumerable<OrderDetail>> GetAllAsync();
         Task UpdateAsync(OrderDetail orderDetail);
         Task DeleteAsync(Guid id);
+        Task DeleteDetailsByOrderIdAsync(Guid id);
     }
 }

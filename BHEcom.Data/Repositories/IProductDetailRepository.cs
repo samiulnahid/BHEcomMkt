@@ -13,7 +13,7 @@ namespace BHEcom.Data.Repositories
         Task<bool> AddAsync(ProductDetail productDetail);
         Task<ProductDetail> GetByIdAsync(Guid id);
         Task<IEnumerable<ProductDetail>> GetAllAsync();
-        Task UpdateAsync(ProductDetail productDetail);
+        Task<bool> UpdateAsync(ProductDetail productDetail);
         Task DeleteAsync(Guid id);
         Task<IEnumerable<ProductDetail>> GetAllByProductIdAsync(Guid id);
     }

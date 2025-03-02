@@ -15,10 +15,22 @@ namespace BHEcom.Services.Interfaces
         Task<IEnumerable<Product>> GetLatestProductsAsync(int num);
         Task<(IEnumerable<Product>? Products, int? TotalCount)> FilterAllProduct(ProductFilter filterEntity);
         Task<Product> GetProductByIdAsync(Guid id);
-        Task<IEnumerable<Product>> GetProductByCategoryIdAsync(Guid id);
+        Task<(IEnumerable<Product> Products, int TotalCount)> GetProductByCategoryIdAsync(Guid id, int pageNumber, int pageSize);
+        Task<(IEnumerable<Product> Products, int TotalCount)> GetProductByBrandIdAsync(Guid id, int pageNumber, int pageSize);
         Task<Guid> AddProductAsync(Product product);
-        Task<bool> UpdateProductAsync(Product product);
-        Task DeleteProductAsync(Guid id);
+        Task<(bool isUpdated, string? oldImageUrl)> UpdateProductAsync(Product product);
+        Task<bool> UpdateProductDescripAsync(Product product);
+
+        Task<(bool isDelete, string? oldImageUrl)> DeleteProductAsync(Guid id);
+        Task<List<Product>> GetTopSellingRandomProductsAsync(int featureCount, int randomCount);
+       // Task<(List<Product>? Products, int? TotalCount)> SearchProductsAsync(string searchTerm, ProductFilter filter);
+        Task<(List<Product>? Products, int? TotalCount)> SearchProductsAsync( ProductFilter filter);
+        Task<(List<Product> TopSellingProducts, int TotalCount)> GetAllTopSellingProductsAsync(int featureCount, ProductFilter filter);
+
+        Task<PageVisit> GetPageVisitAsync(Guid productId, string type, string currentMonth);
+        Task<bool> CreatePageVisitAsync(PageVisit pageVisit);
+        Task<bool> UpdatePageVisitAsync(PageVisit pageVisit);
+
     }
 
 }

@@ -46,18 +46,20 @@ namespace BHEcom.Data.Repositories
             return await _context.ProductDetails.ToListAsync();
         }
        
-        public async Task UpdateAsync(ProductDetail productDetail)
+        public async Task<bool> UpdateAsync(ProductDetail productDetail)
         {
-            try
+            var existingDetail = await _context.ProductDetails.FirstOrDefaultAsync(p => p.DetailID == productDetail.DetailID);
+
+            if (existingDetail == null)
             {
-                _context.ProductDetails.Update(productDetail);
-                await _context.SaveChangesAsync();
+                return false; // Return false if the user is not found
             }
-            catch (Exception ex)
-            {
-                // Handle the exception as needed
-               _logger.LogError(ex, "An error occurred while updating a productDetail.");
-            }
+            existingDetail.DetailValue = productDetail.DetailValue;
+           
+            _context.ProductDetails.Update(productDetail);
+            await _context.SaveChangesAsync(); 
+            return true;
+
         }
 
         public async Task DeleteAsync(Guid id)

@@ -29,7 +29,7 @@ namespace BHEcom.Api.Controllers
             {
 
                 _logger.LogError(ex, "An error occurred while adding a formSubmissionField.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
@@ -50,7 +50,7 @@ namespace BHEcom.Api.Controllers
             {
 
                 _logger.LogError(ex, "An error occurred while getting a formSubmissionField.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
@@ -67,7 +67,7 @@ namespace BHEcom.Api.Controllers
             {
 
                 _logger.LogError(ex, "An error occurred while getting all formSubmissionField.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
@@ -89,7 +89,7 @@ namespace BHEcom.Api.Controllers
             {
 
                 _logger.LogError(ex, "An error occurred while updating a formSubmissionField.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
@@ -106,7 +106,7 @@ namespace BHEcom.Api.Controllers
             {
 
                 _logger.LogError(ex, "An error occurred while deleting a formSubmissionField.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }

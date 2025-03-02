@@ -8,8 +8,8 @@ namespace BHEcom.Data.Repositories
     {
         Task<IEnumerable<Brand>> GetAllAsync();
         Task<Brand> GetByIdAsync(Guid id);
-        Task AddAsync(Brand brand);
-        Task UpdateAsync(Brand brand);
+        Task<(Guid id, bool isUnique)> AddAsync(Brand brand);
+        Task<(bool isUpdated, string? oldImageUrl, bool isUniqueName)> UpdateAsync(Brand brand);
         Task DeleteAsync(Guid id);
     }
 }

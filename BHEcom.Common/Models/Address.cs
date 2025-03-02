@@ -13,6 +13,8 @@ namespace BHEcom.Common.Models
         [Key]
         public Guid AddressID { get; set; }
         public Guid UserID { get; set; }
+        public string? FullName { get; set; }
+        public string? Number { get; set; }
         public string? AddressType { get; set; }
         public string AddressLine1 { get; set; }
         public string? AddressLine2 { get; set; }

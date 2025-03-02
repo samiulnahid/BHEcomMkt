@@ -9,8 +9,8 @@ namespace BHEcom.Services.Interfaces
         Task<IEnumerable<Category>> GetAllCategoriesAsync();
         Task<IEnumerable<Category>> GetSubCategoriesByParentCategoryIDAsync(Guid id);
         Task<Category> GetCategoryByIdAsync(Guid id);
-        Task AddCategoryAsync(Category category);
-        Task UpdateCategoryAsync(Category category);
+        Task<(Guid id, bool isUnique)> AddCategoryAsync(Category category);
+        Task<(bool isUpdated, string? oldImageUrl, bool isUniqueName)> UpdateCategoryAsync(Category category);
         Task DeleteCategoryAsync(Guid id);
     }
 }

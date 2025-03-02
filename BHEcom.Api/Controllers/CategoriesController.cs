@@ -5,6 +5,8 @@ using BHEcom.Common.Models;
 using BHEcom.Services;
 using BHEcom.Services.Interfaces;
 using BHEcom.Data.Repositories;
+using BHEcom.Common.Helper;
+using BHEcom.Services.Implementations;
 
 namespace BHEcom.Api.Controllers
 {
@@ -14,10 +16,13 @@ namespace BHEcom.Api.Controllers
     {
         private readonly ICategoryService _categoryService;
         private readonly ILogger<CategoryRepository> _logger;
-        public CategoriesController(ICategoryService categoryService, ILogger<CategoryRepository> logger)
+        private readonly FtpUploader _ftpUploader;
+
+        public CategoriesController(ICategoryService categoryService, ILogger<CategoryRepository> logger, FtpUploader ftpUploader)
         {
             _categoryService = categoryService;
             _logger = logger;
+            _ftpUploader = ftpUploader;
         }
 
         [HttpGet("GetAll")]
@@ -26,32 +31,47 @@ namespace BHEcom.Api.Controllers
             try
             {
                 var categories = await _categoryService.GetAllCategoriesAsync();
-                return Ok(categories);
+                return Ok(new { data = categories, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while adding a category.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
 
         // Other actions if needed
         [HttpPost("Create")]
-        public async Task<ActionResult> Create([FromBody] Category category)
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> Create([FromForm] Category category, [FromForm] IFormFile imageFile)
         {
             try
             {
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    string folderName = "ecom/category"; // Adjust based on the product folder
+                    string imageUrl = await _ftpUploader.UploadFileAsync(imageFile, folderName);
+
+                    // Assign the uploaded image URL to the product
+                    category.Image = imageUrl;
+                }
                 category.CreatedDate = DateTime.Now;
-                await _categoryService.AddCategoryAsync(category);
-                return CreatedAtAction(nameof(GetById), new { id = category.CategoryID }, category);
+               var (categoryID, isUnique) =  await _categoryService.AddCategoryAsync(category);
+
+                if (!isUnique)
+                {
+                    return StatusCode(500, new { Message = "Category Name already exist!", Success = false });
+                }
+
+                return Ok(new { id = categoryID, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while getting a category.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
@@ -64,15 +84,15 @@ namespace BHEcom.Api.Controllers
                 var category = await _categoryService.GetCategoryByIdAsync(id);
                 if (category == null)
                 {
-                    return NotFound();
+                    return Ok(new { data = category,Message = "Not Found!", Success = true });
                 }
-                return Ok(category);
+                return Ok(new { data = category, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while getting all category.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
@@ -80,7 +100,8 @@ namespace BHEcom.Api.Controllers
 
 
         [HttpPut("Update/{id}")]
-        public async Task<ActionResult> Update(Guid id, [FromBody] Category category)
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> Update(Guid id, [FromForm] Category category, [FromForm] IFormFile imageFile)
         {
             try
             {
@@ -88,15 +109,40 @@ namespace BHEcom.Api.Controllers
                 {
                     return BadRequest();
                 }
-                category.ModifiedDate = DateTime.Now;
-                await _categoryService.UpdateCategoryAsync(category);
+
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    string folderName = "ecom/category"; // Adjust based on the product folder
+                    string imageUrl = await _ftpUploader.UploadFileAsync(imageFile, folderName);
+
+                    // Assign the uploaded image URL to the product
+                    category.Image = imageUrl;
+                }
+
+                var (isUpdated, oldImageUrl, isUniqueName) = await _categoryService.UpdateCategoryAsync(category);
+
+                if (!isUpdated)
+                {
+                    if (!isUniqueName)
+                    {
+                        return StatusCode(500, new { Message = "Category Name already exist!", Success = false });
+                    }
+                    return StatusCode(500, new { Message = "Unsuccessfully Updated", Success = false });
+                }
+
+
+                if (!string.IsNullOrEmpty(oldImageUrl))
+                {
+                    // Image delete code
+                    _ftpUploader.DeleteFile(oldImageUrl);
+                }
                 return Ok(new { Message = "Successfully Updated", Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while updating a category.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
@@ -113,7 +159,7 @@ namespace BHEcom.Api.Controllers
             {
 
                 _logger.LogError(ex, "An error occurred while deleting a category.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }

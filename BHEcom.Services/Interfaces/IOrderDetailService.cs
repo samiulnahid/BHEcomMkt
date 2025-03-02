@@ -14,5 +14,6 @@ namespace BHEcom.Services.Interfaces
         Task<Guid> AddOrderDetailAsync(OrderDetail orderDetail);
         Task UpdateOrderDetailAsync(OrderDetail orderDetail);
         Task DeleteOrderDetailAsync(Guid id);
+        Task DeleteDetailsByOrderIdAsync(Guid id);
     }
 }

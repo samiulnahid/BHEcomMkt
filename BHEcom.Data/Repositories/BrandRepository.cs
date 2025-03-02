@@ -27,31 +27,77 @@ namespace BHEcom.Data.Repositories
             return await _context.Brands.FindAsync(id);
         }
 
-        public async Task AddAsync(Brand brand)
+        public async Task<(Guid id, bool isUnique)> AddAsync(Brand brand)
         {
             try
             {
+                // Check if a brand with the same name already exists
+                bool brandExists = await _context.Brands
+                    .AnyAsync(b => b.BrandName == brand.BrandName);
+
+                if (brandExists)
+                {
+                    _logger.LogWarning($"A brand with the name '{brand.BrandName}' already exists.", brand.BrandName);
+                    return (Guid.Empty,false); // Return Guid.Empty to indicate failure
+                }
                 await _context.Brands.AddAsync(brand);
                 await _context.SaveChangesAsync();
+                return (brand.BrandID,true);
             }
             catch (Exception ex)
             {
-
                 _logger.LogError(ex, "An error occurred while adding a brand.");
+                throw;
             }
         }
 
-        public async Task UpdateAsync(Brand brand)
+        public async Task<(bool isUpdated, string? oldImageUrl, bool isUniqueName)> UpdateAsync(Brand brand)
         {
             try
             {
+                string? oldImage = string.Empty;
+                // Find the existing user by UserId
+                var existingBrand = await _context.Brands.FirstOrDefaultAsync(b => b.BrandID == brand.BrandID);
+
+                if (existingBrand == null)
+                {
+                    return (false, oldImage, true); 
+                }
+
+                // Check if the BrandName has changed and is unique
+                if (existingBrand.BrandName != brand.BrandName)
+                {
+                    bool isBrandNameUnique = await _context.Brands
+                        .AnyAsync(b => b.BrandName == brand.BrandName && b.BrandID != brand.BrandID);
+
+                    if (isBrandNameUnique)
+                    {
+                        _logger.LogWarning($"A brand with the name '{brand.BrandName}' already exists.", brand.BrandName);
+                        return (false, oldImage, false);
+                    }
+                }
+
+                // Update the UserName
+                existingBrand.BrandName = brand.BrandName;
+                existingBrand.Description = brand.Description;
+                existingBrand.ModifiedBy = brand.ModifiedBy;
+                existingBrand.ModifiedDate = DateTime.Now;
+                existingBrand.IsActive = true;
+
+                if (brand.Image != null)
+                {
+                    oldImage = existingBrand.Image;
+                    existingBrand.Image = brand.Image;
+                }
+
                 _context.Brands.Update(brand);
                 await _context.SaveChangesAsync();
+                return (true, oldImage, true);
             }
             catch (Exception ex)
             {
-
                _logger.LogError(ex, "An error occurred while updating a brand.");
+                throw;
             }
         }
 

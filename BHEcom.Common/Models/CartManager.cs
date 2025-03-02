@@ -16,6 +16,7 @@ namespace BHEcom.Common.Models
         public String? ProductName { get; set; }
         public String? ShortDescription { get; set; }
         public String? StoreName { get; set; }
+        public Guid? StoreID { get; set; }
         public decimal? Discount { get; set; }
         public decimal? Price { get; set; }
         public decimal? TotalPrice { get; set; }

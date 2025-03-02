@@ -1,7 +1,9 @@
 ﻿using BHEcom.Common.Models;
 using BHEcom.Data.Repositories;
+using BHEcom.Services.Implementations;
 using BHEcom.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace BHEcom.Api.Controllers
 {
@@ -9,11 +11,13 @@ namespace BHEcom.Api.Controllers
     [Route("api/[controller]")]
     public class CartItemsController : ControllerBase
     {
+        private readonly IProductService _productService;
         private readonly ICartItemService _cartItemService;
         private readonly ILogger<CartItemRepository> _logger;
-        public CartItemsController(ICartItemService cartItemService, ILogger<CartItemRepository> logger)
+        public CartItemsController(ICartItemService cartItemService, IProductService productService, ILogger<CartItemRepository> logger)
         {
             _cartItemService = cartItemService;
+            _productService = productService;
             _logger = logger;
         }
 
@@ -23,13 +27,13 @@ namespace BHEcom.Api.Controllers
             try
             {
                 await _cartItemService.AddCartItemAsync(cartItem);
-                return CreatedAtAction(nameof(GetById), new { id = cartItem.CartItemID }, cartItem);
+                return Ok(new { id = cartItem.CartItemID, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while adding a cartItem.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
@@ -42,14 +46,14 @@ namespace BHEcom.Api.Controllers
                 var cartItem = await _cartItemService.GetCartItemByIdAsync(id);
                 if (cartItem == null)
                 {
-                    return NotFound();
+                    return Ok(new { data = cartItem, Message = "CartItem not found!", Success = true });
                 }
-                return Ok(cartItem);
+                return Ok(new { data = cartItem, Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting a cartItem.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
@@ -61,19 +65,21 @@ namespace BHEcom.Api.Controllers
             {
 
                 var cartItems = await _cartItemService.GetAllCartItemsAsync();
-                return Ok(cartItems);
+                if (cartItems == null)
+                    return Ok(new { data = cartItems, Message = "No Data Available!", Success = true });
+                return Ok(new { data = cartItems, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while getting all cartItem.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
 
         [HttpPut("Update/{id}")]
-        public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] CartItem cartItem)
+        public async Task<IActionResult> Update(Guid id, [FromBody] CartItem cartItem)
         {
             try
             {
@@ -82,30 +88,88 @@ namespace BHEcom.Api.Controllers
                     return BadRequest();
                 }
                 await _cartItemService.UpdateCartItemAsync(cartItem);
-                return NoContent();
+                return Ok(new { Message = "Successfully Updated", Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while updating a cartItem.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
 
         [HttpDelete("Delete/{id}")]
-        public async Task<IActionResult> DeleteAsync(Guid id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             try
             {
-                await _cartItemService.DeleteCartItemAsync(id);
-                return NoContent();
+                bool isDeleted =  await _cartItemService.DeleteCartItemAsync(id);
+                if (!isDeleted)
+                    return StatusCode(500, new { message = "Delete unsuccessful!", success = false });
+                return Ok(new
+                {
+                    Message = "CartItem Delete successfully.",
+                    Success = true
+                });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while deleting a cartItem.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
+
+            }
+        }
+
+        [HttpPut("IncreaseCartItemQuantity")]
+        public async Task<IActionResult> IncreaseCartItemQuantity([FromBody] CartItem cartItem)
+        {
+            try
+            {
+                if (cartItem == null || cartItem.CartItemID == Guid.Empty)
+                    return Ok(new
+                    {
+                        Message = $"CartItemId Requried!",
+                        Success = false
+                    });
+
+                var (isUpdate, message) = await _cartItemService.UpdateCartItemQuantityAsync(cartItem.CartItemID, "increase");
+
+                return Ok(new { Message = message, Success = isUpdate });
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, "An error occurred while updating a cartItem.");
+                return StatusCode(500, new { Message = ex.Message, Success = false });
+
+            }
+        }
+
+
+
+        [HttpPut("DecreaseCartItemQuantity")]
+        public async Task<IActionResult> DecreaseCartItemQuantity([FromBody] CartItem cartItem)
+        {
+            try
+            {
+                if (cartItem == null || cartItem.CartItemID == Guid.Empty)
+                    return Ok(new
+                    {
+                        Message = $"CartItemId Requried!",
+                        Success = false
+                    });
+
+                var (isUpdate, message) = await _cartItemService.UpdateCartItemQuantityAsync(cartItem.CartItemID, "decrease");
+
+                return Ok(new { Message = message, Success = isUpdate });
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, "An error occurred while updating a cartItem.");
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }

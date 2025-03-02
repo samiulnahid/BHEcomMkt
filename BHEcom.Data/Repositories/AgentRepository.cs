@@ -107,14 +107,16 @@ namespace BHEcom.Data.Repositories
         }
 
 
-        public async Task DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var agent = await _context.Agents.FindAsync(id);
             if (agent != null)
             {
                 _context.Agents.Remove(agent);
                 await _context.SaveChangesAsync();
+                return true;
             }
+            return false;
         }
     }
 

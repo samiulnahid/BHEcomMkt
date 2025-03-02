@@ -11,11 +11,13 @@ namespace BHEcom.Services.Interfaces
     {
         Task<IEnumerable<Cart>> GetAllCartsAsync();
         Task<Cart> GetCartByIdAsync(Guid id);
+        Task<Cart> GetCartByuserIdAsync(Guid id);
         Task<Guid> AddCartAsync(Cart cart);
         Task<bool> UpdateCartAsync(Cart cart);
         Task<bool> DeleteCartAsync(Guid id);
         Task<IEnumerable<CartManager>> GetCartItemsByUserIdAsync(Guid userId);
         Task ClearCartAsync(Guid cartId);
+        Task<bool> DeleteFullCartAsync(Guid cartId);
         Task<List<CartManager>> GetCartManagerByCartIdAsync(Guid cartId);
     }
 

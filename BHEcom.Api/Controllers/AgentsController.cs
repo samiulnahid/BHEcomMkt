@@ -2,6 +2,7 @@
 using BHEcom.Data.Repositories;
 using BHEcom.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace BHEcom.Api.Controllers
 {
@@ -23,13 +24,13 @@ namespace BHEcom.Api.Controllers
             try
             {
                 Guid agentId = await _agentService.AddAgentAsync(agent);
-                return CreatedAtAction(nameof(GetById), new { id = agent.AgentID }, agent);
+                return Ok(new { id = agentId, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while adding a agent.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -41,15 +42,15 @@ namespace BHEcom.Api.Controllers
                 var agent = await _agentService.GetAgentByIdAsync(id);
                 if (agent == null)
                 {
-                    return NotFound();
+                    return Ok(new { data = agent,Message = "No data found!", Success = true });
                 }
-                return Ok(agent);
+                return Ok(new { data = agent, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while getting a agent.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -59,13 +60,15 @@ namespace BHEcom.Api.Controllers
             try
             {
                 var agents = await _agentService.GetAllAgentsAsync();
-                return Ok(agents);
+                if (agents == null)
+                    return Ok(new { data = agents, Message = "No data found!", Success = true });
+                return Ok(new { data = agents, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while getting all agent.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -78,14 +81,16 @@ namespace BHEcom.Api.Controllers
                 {
                     return BadRequest();
                 }
-                await _agentService.UpdateAgentAsync(agent);
-                return Ok("Successfully Updated");
+                bool isUpdate = await _agentService.UpdateAgentAsync(agent);
+                if (!isUpdate) 
+                     return Ok(new { Message = "Update Unsuccessful ", Success = false });
+                return Ok(new { Message = "Successfully Updated", Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while updating a agent.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -94,14 +99,16 @@ namespace BHEcom.Api.Controllers
         {
             try
             {
-                await _agentService.DeleteAgentAsync(id);
-                return Ok("Successfully Deleted");
+                bool isDelete = await _agentService.DeleteAgentAsync(id);
+                if (!isDelete)
+                            return Ok(new { Message = "Delete unsuccessful", Success = false });
+                return Ok(new { Message = "Successfully Deleted", Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while deleting a agent.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
     }

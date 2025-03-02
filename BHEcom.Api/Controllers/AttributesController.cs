@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using BHEcom.Common.Models;
 using BHEcom.Services.Interfaces;
+using Microsoft.Extensions.Logging;
+using System;
 
 namespace BHEcom.Api.Controllers
 {
@@ -23,13 +25,13 @@ namespace BHEcom.Api.Controllers
             try
             {
                 await _attributeService.AddAttributeAsync(attribute);
-                return CreatedAtAction(nameof(GetById), new { id = attribute.AttributeID }, attribute);
+                return Ok(new { id = attribute.AttributeID, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while adding a attribute.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -41,15 +43,15 @@ namespace BHEcom.Api.Controllers
                 var attribute = await _attributeService.GetAttributeByIdAsync(id);
                 if (attribute == null)
                 {
-                    return NotFound();
+                    return Ok(new { data = attribute,Message = "No data found!", Success = true });
                 }
-                return Ok(attribute);
+                return Ok(new { data = attribute, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while getting a attribute.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -59,13 +61,16 @@ namespace BHEcom.Api.Controllers
             try
             {
                 var attributes = await _attributeService.GetAllAttributesAsync();
-                return Ok(attributes);
+                if (attributes == null)
+                    return Ok(new { data = attributes, Message = "No data found!", Success = true });
+                return Ok(new { data = attributes, Success = true });
+
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while getting all attribute.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -79,13 +84,13 @@ namespace BHEcom.Api.Controllers
                     return BadRequest();
                 }
                 await _attributeService.UpdateAttributeAsync(attribute);
-                return NoContent();
+                return Ok(new { Message = "Successfully Updated", Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while updating a attribute.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -95,13 +100,13 @@ namespace BHEcom.Api.Controllers
             try
             {
                 await _attributeService.DeleteAttributeAsync(id);
-                return NoContent();
+                return Ok(new { Message = "Successfully Deleted", Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while deleting a attribute.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
     }

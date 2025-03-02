@@ -26,7 +26,7 @@ namespace BHEcom.Data.Repositories
        // Task<Guid> CreateUserAndAssignRoleAsync(User user, string roleName, string email);
         Task<bool> UpdateUserAsync(User user);
         Task<bool> CheckUserNameExistAsync(User user);
-        Task<(bool IsSuccess, Guid UserId, string RoleName)> ValidateUser(string userName, string password);
+        Task<(bool IsSuccess, Guid UserId, string RoleName, string UserName)> ValidateUser(string userName, string password);
 
     }
 

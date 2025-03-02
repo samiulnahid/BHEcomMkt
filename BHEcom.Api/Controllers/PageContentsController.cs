@@ -33,7 +33,7 @@ namespace BHEcom.Api.Controllers
             {
 
                 _logger.LogError(ex, "An error occurred while adding a pageContent.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -53,7 +53,7 @@ namespace BHEcom.Api.Controllers
             {
 
                 _logger.LogError(ex, "An error occurred while getting a pageContent.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -69,7 +69,7 @@ namespace BHEcom.Api.Controllers
             {
 
                 _logger.LogError(ex, "An error occurred while getting all pageContent.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -89,7 +89,7 @@ namespace BHEcom.Api.Controllers
             {
 
                 _logger.LogError(ex, "An error occurred while updating a pageContent.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -106,7 +106,7 @@ namespace BHEcom.Api.Controllers
             {
 
                 _logger.LogError(ex, "An error occurred while deleting a pageContent.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
     }

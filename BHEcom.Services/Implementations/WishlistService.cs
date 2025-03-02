@@ -22,26 +22,76 @@ namespace BHEcom.Services.Implementations
         {
             return await _wishlistRepository.GetAllAsync();
         }
+         public async Task<IEnumerable<WishlistManager>> GetByUserIdAsync(Guid userId)
+        {
+            return await _wishlistRepository.GetByUserIdAsync(userId);
+        }
 
         public async Task<Wishlist> GetWishlistByIdAsync(Guid id)
         {
             return await _wishlistRepository.GetByIdAsync(id);
         }
-
-        public async Task AddWishlistAsync(Wishlist wishlist)
+        public async Task<IEnumerable<WishlistManager>> GetListWithItemsByIdAsync(Guid id)
         {
-            await _wishlistRepository.AddAsync(wishlist);
+            return await _wishlistRepository.GetListWithItemsByIdAsync(id);
         }
 
-        public async Task UpdateWishlistAsync(Wishlist wishlist)
+        public async Task<Guid> AddWishlistAsync(Wishlist wishlist)
         {
-            await _wishlistRepository.UpdateAsync(wishlist);
+            return await _wishlistRepository.AddAsync(wishlist);
         }
 
-        public async Task DeleteWishlistAsync(Guid id)
+        public async Task<bool> UpdateWishlistAsync(Wishlist wishlist)
         {
-            await _wishlistRepository.DeleteAsync(id);
+           return await _wishlistRepository.UpdateAsync(wishlist);
         }
+
+        public async Task<bool> DeleteWishlistAsync(Guid id)
+        {
+          return   await _wishlistRepository.DeleteAsync(id);
+        }
+         public async Task ClearWishlistAsync(Guid id)
+        {
+            await _wishlistRepository.ClearWishlistAsync(id);
+        }
+
+        public async Task<WishlistItem> GetWishlistItemByWishlistAndProductIdAsync(Guid wishlistId, Guid productId)
+        {
+            return await _wishlistRepository.GetWishlistItemByWishlistAndProductIdAsync(wishlistId, productId);
+        }
+        public async Task<WishlistItem> GetWishlistItemByIdAsync(Guid id)
+        {
+            return await _wishlistRepository.GetWishlistItemByIdAsync(id);
+        }
+
+        public async Task<Wishlist> GetWishlistByUserIdAsync(Guid id)
+        {
+            return await _wishlistRepository.GetWishlistByUserIdAsync(id);
+        }
+        
+        public async Task<Guid> AddWishlistItemAsync(WishlistItem wishlistItem)
+        {
+            return await _wishlistRepository.AddWishlistItemAsync(wishlistItem);
+        }
+
+        public async Task<bool> UpdateWishlistItemAsync(WishlistItem wishlistItem)
+        {
+            return await _wishlistRepository.UpdateWishlistItemAsync(wishlistItem);
+        } 
+        public async Task<bool> DeleteWishlistByUserId(Guid wishlistId)
+        {
+            return await _wishlistRepository.DeleteWishlistByUserId(wishlistId);
+        }
+        public async Task<bool> DeleteWishlistItemAsync(Guid id)
+        {
+            return await _wishlistRepository.DeleteWishlistItemAsync(id);
+        }
+         public async Task<bool> DeleteFullWishlistAsync(Guid wishlistID)
+        {
+            return await _wishlistRepository.DeleteFullWishlistAsync(wishlistID);
+        }
+
+
     }
 
 }

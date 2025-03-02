@@ -41,6 +41,10 @@ namespace BHEcom.Services.Implementations
         public async Task DeleteOrderDetailAsync(Guid id)
         {
             await _orderDetailRepository.DeleteAsync(id);
+        } 
+        public async Task DeleteDetailsByOrderIdAsync(Guid id)
+        {
+            await _orderDetailRepository.DeleteDetailsByOrderIdAsync(id);
         }
     }
 }

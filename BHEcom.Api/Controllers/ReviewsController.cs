@@ -28,7 +28,7 @@ namespace BHEcom.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while adding a review.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -47,7 +47,7 @@ namespace BHEcom.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting a review.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -62,7 +62,7 @@ namespace BHEcom.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting all review.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -82,7 +82,7 @@ namespace BHEcom.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating a review.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -98,7 +98,7 @@ namespace BHEcom.Api.Controllers
             {
 
                 _logger.LogError(ex, "An error occurred while deleting a review.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
     }

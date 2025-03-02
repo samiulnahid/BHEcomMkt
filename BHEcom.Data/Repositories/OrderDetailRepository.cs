@@ -67,5 +67,16 @@ namespace BHEcom.Data.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task DeleteDetailsByOrderIdAsync(Guid id)
+        {
+            var orderDetails = await _context.OrderDetails
+                                              .Where(od => od.OrderID == id)
+                                              .ToListAsync();
+            if (orderDetails != null)
+            {
+                _context.OrderDetails.RemoveRange(orderDetails);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

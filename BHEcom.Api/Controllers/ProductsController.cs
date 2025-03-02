@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Mvc;
 using static System.Net.Mime.MediaTypeNames;
 using System.IO;
+using BHEcom.Common.Helper;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace BHEcom.Api.Controllers
 {
@@ -18,10 +21,12 @@ namespace BHEcom.Api.Controllers
         private readonly ICategoryService _categoryService;
         private readonly IProductDetailService _productDetailService;
         private readonly IWebHostEnvironment _environment;
+        private readonly IImageService _imageService;
+        private readonly FtpUploader _ftpUploader;
 
 
         private readonly ILogger<ProductRepository> _logger;
-        public ProductsController(IProductService productService, ILogger<ProductRepository> logger, IStoreService storeService, ICategoryService categoryService, IProductDetailService productDetailService, IWebHostEnvironment environment)
+        public ProductsController(IProductService productService, ILogger<ProductRepository> logger, IStoreService storeService, ICategoryService categoryService, IProductDetailService productDetailService, IWebHostEnvironment environment, IImageService imageService, FtpUploader ftpUploader)
         {
             _productService = productService;
             _logger = logger;
@@ -29,6 +34,8 @@ namespace BHEcom.Api.Controllers
             _categoryService = categoryService;
             _productDetailService = productDetailService;
             _environment = environment;
+            _ftpUploader = ftpUploader;
+            _imageService = imageService;
         }
 
         [HttpPost("Create")]
@@ -42,82 +49,85 @@ namespace BHEcom.Api.Controllers
                     return BadRequest("Product data is required.");
                 }
 
-               
+                #region Old Image Path Code
+                //if (imageFile != null && imageFile.Length > 0)
+                //{
+                //var galleryPath = Path.Combine(Directory.GetCurrentDirectory(), "Images", "Gallery");
+                //var productPath = Path.Combine(galleryPath, "Product");
+
+                //// Ensure "Gallery" folder exists
+                //if (!Directory.Exists(galleryPath))
+                //{
+                //    Directory.CreateDirectory(galleryPath);
+                //}
+
+                //// Ensure "Product" folder exists
+                //if (!Directory.Exists(productPath))
+                //{
+                //    Directory.CreateDirectory(productPath);
+                //}
+
+                // Use the common FTP upload method
+
+                //string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
+                //var fullPath = Path.Combine(productPath, uniqueFileName);
+
+                //// Save the file
+                //using (var fileStream = new FileStream(fullPath, FileMode.Create))
+                //{
+                //    await imageFile.CopyToAsync(fileStream);
+                //}
+                //// Set the image path in the product object
+                // product.Image = Path.Combine("Gallery", "Product", Path.GetFileName(fullPath)).Replace("\\", "/");
+
+                //}
+
+                #endregion
+
                 if (imageFile != null && imageFile.Length > 0)
                 {
-                    var galleryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Gallery");
-                    var productPath = Path.Combine(galleryPath, "Product");
+                    string folderName = "ecom/product"; // Adjust based on the product folder
+                    string imageUrl = await _ftpUploader.UploadFileAsync(imageFile, folderName);
 
-                    //var productPath = Path.Combine(galleryPath, "Product");
-
-                    // Ensure "Gallery" folder exists
-                    if (!Directory.Exists(galleryPath))
-                    {
-                        Directory.CreateDirectory(galleryPath);
-                    }
-
-                    // Ensure "Product" folder exists
-                    if (!Directory.Exists(productPath))
-                    {
-                        Directory.CreateDirectory(productPath);
-                    }
-
-
-                    //if (!Directory.Exists(folderPath))
-                    //{
-                    //    Directory.CreateDirectory(folderPath);
-                    //}
-                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
-                    var fullPath = Path.Combine(productPath, uniqueFileName);
-
-
-                    // Save the file
-                    using (var fileStream = new FileStream(fullPath, FileMode.Create))
-                    {
-                        await imageFile.CopyToAsync(fileStream);
-                    }
-
-                    // Set the image path in the product object
-                     product.Image = Path.Combine("Gallery", "Product", Path.GetFileName(fullPath)).Replace("\\", "/");
-
-
-                    //product.Image = Path.Combine("images", uniqueFileName).Replace("\\","/"); 
-
-                    //if (imageFile != null && imageFile.Length > 0)
-                    //{
-                    //string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
-                    //Directory.CreateDirectory(uploadsFolder); // Ensure directory exists
-
-                    // Generate a unique filename to avoid conflicts
-                    //string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
-                    //string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                    // Save the image to the specified local path
-                    //using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    //{
-                    // await imageFile.CopyToAsync(fileStream);
-                    // }
-
-                    // Set the product's Image property to the relative file path for database storage
-                    //product.Image = Path.Combine("images", uniqueFileName);
-                    //}
+                    // Assign the uploaded image URL to the product
+                    product.Image = imageUrl;
                 }
+
                 product.CreatedDate = DateTime.Now;
                 Guid productId = await _productService.AddProductAsync(product);
-                return Ok(new {ProductId = productId , Success = true});
-
-
+                return Ok(new { id = productId, Success = true });
 
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while adding a product.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
+        // [HttpPost("CreateProduct")]
+        //public async Task<ActionResult> CreateProduct([FromBody] Product product)
+        //{
+        //    try
+        //    {
+        //        if (product == null)
+        //        {
+        //            return BadRequest("Product data is required.");
+        //        }
+
+        //        product.CreatedDate = DateTime.Now;
+        //        Guid productId = await _productService.AddProductAsync(product);
+        //        return Ok(new {ProductId = productId , Success = true});
 
 
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "An error occurred while adding a product.");
+        //        return StatusCode(500, new { Message = ex.Message, Success = false });
+        //    }
+        //}
 
         [HttpGet("GetById/{id}")]
         public async Task<ActionResult<Product>> GetById(Guid id)
@@ -127,57 +137,42 @@ namespace BHEcom.Api.Controllers
                 var product = await _productService.GetProductByIdAsync(id);
                 if (product == null)
                 {
-                    return NotFound();
+                    return Ok(new { data = product, message = "Not Found!", success = true });
                 }
 
-                // Append base URL to image path if needed
-                if (!string.IsNullOrEmpty(product.Image))
-                {
-                    //product.Image = $"{Request.Scheme}://{Request.Host}/{product.Image}";
-                    var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", product.Image.Replace("/", Path.DirectorySeparatorChar.ToString()));
-                    if (System.IO.File.Exists(imagePath))
-                    {
-                        product.Image = $"{Request.Scheme}://{Request.Host}/{product.Image}";
-                    }
-                    else
-                    {
-                        product.Image = $"{Request.Scheme}://{Request.Host}/images/default-product.jpg"; // Default image URL
-                    }
-                }
-
-                return Ok(product);
+                return Ok(new { data = product, Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting a product.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
-
-
-        [HttpGet("GetByCategoryId/{id}")]
-        public async Task<ActionResult<List<Product>>> GetByCategoryId(Guid id)
+        [HttpGet("GetByCategoryId/{id}/{pageNumber}/{pageSize}")]
+        public async Task<ActionResult<List<Product>>> GetByCategoryId(Guid id, int pageNumber = 1, int pageSize = 10)
         {
             try
             {
-                var product = await _productService.GetProductByCategoryIdAsync(id);
-                if (product == null)
+                var (products, totalCount) = await _productService.GetProductByCategoryIdAsync(id, pageNumber, pageSize);
+                if (products == null)
                 {
-                    return NotFound();
+                    return Ok(new { Products = products, totalPage = 0, Success = true });
                 }
-                var result = GenerateProductObjectList(product);
 
-                return Ok(product);
+                // Calculate the total number of pages
+                int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+                return Ok(new { data = products, totalPage = totalPages, Success = true });
+
 
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting a product.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
-
 
         [HttpGet("GetAll")]
         public async Task<ActionResult<List<Product>>> GetAll()
@@ -186,14 +181,14 @@ namespace BHEcom.Api.Controllers
             {
                 var products = await _productService.GetAllProductsAsync();
 
-                //var result = GenerateProductObjectList(products);
-                return Ok(products);
+                //var result = GenerateProductImageUrl(products);
+                return Ok(new { data = products, Success = true });
 
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting all products.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -204,19 +199,19 @@ namespace BHEcom.Api.Controllers
             {
                 var products = await _productService.GetAllProductsByStoreIdAsync(id);
 
-                var result = GenerateProductObjectList(products);
-                return Ok(products);
+                //var result = GenerateProductImageUrl(products);
+                return Ok(new { data = products, Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting all products.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
-
         [HttpPut("Update/{id}")]
-        public async Task<ActionResult> Update(Guid id, [FromForm] Product product)
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> Update(Guid id, [FromForm] Product product, [FromForm] IFormFile? imageFile)
         {
             try
             {
@@ -225,58 +220,128 @@ namespace BHEcom.Api.Controllers
                     return BadRequest("Product ID mismatch.");
                 }
 
-                //// Check if a new image file is provided
+                #region old Image Url Code
                 //if (imageFile != null && imageFile.Length > 0)
                 //{
-                //    // Remove the old image if it exists
-                //    if (!string.IsNullOrEmpty(product.Image))
+                //    var galleryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Gallery");
+                //    var productPath = Path.Combine(galleryPath, "Product");
+
+                //    // Ensure "Gallery" folder exists
+                //    if (!Directory.Exists(galleryPath))
                 //    {
-                //        string oldImagePath = Path.Combine("wwwroot", product.Image);
-                //        if (System.IO.File.Exists(oldImagePath))
+                //        Directory.CreateDirectory(galleryPath);
+                //    }
+
+                //    // Ensure "Product" folder exists
+                //    if (!Directory.Exists(productPath))
+                //    {
+                //        Directory.CreateDirectory(productPath);
+                //    }
+
+                //    string fileName = Path.GetFileName(imageFile.FileName);
+                //    string uniqueFileName = Guid.NewGuid().ToString() + "_" + fileName;
+                //    var fullPath = Path.Combine(productPath, uniqueFileName);
+
+                //    // Check if the file already exists
+                //    var existingFile = Directory.GetFiles(productPath, $"*_{fileName}").FirstOrDefault();
+                //    if (existingFile != null)
+                //    {
+                //        // Use the existing file's relative path
+                //        product.Image = Path.Combine("Gallery", "Product", Path.GetFileName(existingFile)).Replace("\\", "/");
+                //    }
+                //    else
+                //    {
+                //        // Save the file
+                //        using (var fileStream = new FileStream(fullPath, FileMode.Create))
                 //        {
-                //            System.IO.File.Delete(oldImagePath);
+                //            await imageFile.CopyToAsync(fileStream);
                 //        }
+
+                //        // Set the image path in the product object
+                //        product.Image = Path.Combine("Gallery", "Product", Path.GetFileName(fullPath)).Replace("\\", "/");
                 //    }
-
-                //    // Save the new image
-                //    string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
-                //    Directory.CreateDirectory(uploadsFolder);
-
-                //    string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
-                //    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                //    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                //    {
-                //        await imageFile.CopyToAsync(fileStream);
-                //    }
-
-                //    // Update the product's Image property with the new image path
-                //    product.Image = Path.Combine("images", uniqueFileName);
                 //}
 
-                await _productService.UpdateProductAsync(product);
-                return Ok("Successfully Updated");
+                #endregion
+
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    string folderName = "ecom/product"; // Adjust based on the product folder
+                    string imageUrl = await _ftpUploader.UploadFileAsync(imageFile, folderName);
+
+                    // Assign the uploaded image URL to the product
+                    product.Image = imageUrl;
+                }
+
+                var (isUpdated, oldImageUrl) = await _productService.UpdateProductAsync(product);
+
+                if (!isUpdated)
+                {
+                    return StatusCode(500, new { Message = "Unsuccessfully Updated", Success = false });
+                }
+
+                if (!string.IsNullOrEmpty(oldImageUrl))
+                {
+                    // Image delete code
+                    _ftpUploader.DeleteFile(oldImageUrl);
+                }
+
+                return Ok(new { Message = "Successfully Updated", Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating a product.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
-
 
         [HttpDelete("Delete/{id}")]
         public async Task<ActionResult> Delete(Guid id)
         {
             try
             {
-                await _productService.DeleteProductAsync(id);
-                return Ok("Successfully Deleted");
+                string xType = ResourceType.Product.ToString().ToLower();
+
+                var images = await _imageService.GetImagesByXIdAsync(id, xType);
+
+                // Delete Product From product table
+                var (isDelete, oldImageUrl) = await _productService.DeleteProductAsync(id);
+
+                if (!isDelete)
+                {
+                    return NotFound(new { Message = "No product found for the provided id.", Success = false });
+                }
+
+                if (!string.IsNullOrEmpty(oldImageUrl))
+                {
+                    // Image delete code
+                    _ftpUploader.DeleteFile(oldImageUrl);
+                }
+
+                // Call repository to delete all product images
+                bool isDeleted = await _imageService.DeleteImagesByXIdAsync(id, xType);
+
+                if (!isDeleted)
+                {
+                    return NotFound(new { Message = "No images found for the provided XID and XType.", Success = false });
+                }
+
+                foreach (var item in images)
+                {
+                    if (!string.IsNullOrEmpty(item.ImagePath))
+                    {
+                        // Image delete code
+                        _ftpUploader.DeleteFile(item.ImagePath);
+                    }
+                }
+
+
+                return Ok(new { Message = "Successfully Deleted", Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while deleting a product.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -286,12 +351,12 @@ namespace BHEcom.Api.Controllers
             try
             {
                 var stores = await _storeService.GetAllStoresAsync();
-                return Ok(stores);
+                return Ok(new { data = stores, Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting all stores.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -302,10 +367,9 @@ namespace BHEcom.Api.Controllers
 
             if (storeData == null)
             {
-                return NotFound();
+                return Ok(new { data = storeData,Message = "Data not Found!", Success = true });
             }
-
-            return Ok(storeData);
+            return Ok(new { data = storeData, Success = true });
         }
 
         [HttpGet("GetSubCategories/{id}")]
@@ -315,23 +379,21 @@ namespace BHEcom.Api.Controllers
 
             if (!subCategories.Any())
             {
-                return NotFound();
+                return Ok(new { data = subCategories, Message = "Data not Found!", Success = true });
             }
-
-            return Ok(subCategories);
+            return Ok(new { data = subCategories, Success = true });
         }
 
         [HttpGet("GetProductFieldsByCategoryId/{id}")]
         public async Task<ActionResult<StoreProductField>> GetProductFieldsByCategoryId(Guid id)
         {
-            var subCategories = await _storeService.GetProductFieldsByCategoryId(id);
+            var productFields = await _storeService.GetProductFieldsByCategoryId(id);
 
-            if (!subCategories.Any())
+            if (!productFields.Any())
             {
-                return NotFound();
+                return Ok(new { data = productFields, Message = "Data not Found!", Success = true });
             }
-
-            return Ok(subCategories);
+            return Ok(new { data = productFields, Success = true });
         }
 
         [HttpPost("CreateProductDetails")]
@@ -339,7 +401,7 @@ namespace BHEcom.Api.Controllers
         {
             try
             {
-                if (productManager == null )
+                if (productManager == null)
                 {
                     return BadRequest("Invalid data.");
                 }
@@ -347,11 +409,64 @@ namespace BHEcom.Api.Controllers
                 {
                     Product product = new Product
                     {
+                        ProductID = productManager.ProductId,
                         Description = productManager.Description,
                         ShortDescription = productManager.ShortDescription,
+
                     };
-                    bool isChange = await _productService.UpdateProductAsync(product);
-                    if (isChange) {
+                    bool isChange = await _productService.UpdateProductDescripAsync(product);
+                    if (!isChange)
+                    {
+                        return Ok(new { Message = "Update Unsuccessful!", Success = false });
+                    }
+
+                }
+
+                if (productManager.ProductDetailList == null)
+                {
+                    return Ok(new { Message = "ProductList Empty!", Success = false });
+                }
+
+                foreach (var productDetail in productManager.ProductDetailList)
+                {
+                    bool IsCreated = await _productDetailService.AddProductDetailAsync(productDetail);
+                    if (!IsCreated)
+                    {
+                        return Ok(new { Message = "Update Unsuccessful!", Success = false });
+                    }
+                }
+                return Ok(new { Message = "Create Succefully", Success = true });
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while adding a productDetail.");
+                return StatusCode(500, new { Message = ex.Message, Success = false });
+            }
+
+        }
+
+        [HttpPost("CreateandUpdateDetails")]
+        public async Task<ActionResult> CreateandUpdateDetails([FromBody] ProductManager productManager)
+        {
+            try
+            {
+                if (productManager == null)
+                {
+                    return BadRequest("Invalid data.");
+                }
+                if (productManager.ShortDescription != null || productManager.Description != null)
+                {
+                    Product product = new Product
+                    {
+                        ProductID = productManager.ProductId,
+                        Description = productManager.Description,
+                        ShortDescription = productManager.ShortDescription,
+
+                    };
+                    bool isChange = await _productService.UpdateProductDescripAsync(product);
+                    if (!isChange)
+                    {
                         return BadRequest("Invalid data.");
                     }
 
@@ -364,21 +479,33 @@ namespace BHEcom.Api.Controllers
 
                 foreach (var productDetail in productManager.ProductDetailList)
                 {
-                    bool IsCreated = await _productDetailService.AddProductDetailAsync(productDetail);
-                    if (!IsCreated)
+                    if (productDetail.DetailID == Guid.Empty)
                     {
-                        return BadRequest("Invalid data.");
+                        bool IsCreated = await _productDetailService.AddProductDetailAsync(productDetail);
+                        if (!IsCreated)
+                        {
+                            return BadRequest("Invalid data.");
+                        }
                     }
+                    else
+                    {
+                        bool IsUpdated = await _productDetailService.UpdateProductDetailAsync(productDetail);
+                        if (!IsUpdated)
+                        {
+                            return NotFound($"ProductDetail with ID {productDetail.DetailID} not found.");
+                        }
+                    }
+
                 }
-                return Ok("created Successfully");
+                return Ok(new { Message = "Create Succefully", Success = true });
 
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while adding a productDetail.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
-            
+
         }
 
         [HttpGet("GetAllProductDetailByProductId/{id}")]
@@ -388,41 +515,61 @@ namespace BHEcom.Api.Controllers
             {
                 var product = await _productService.GetProductByIdAsync(id);
 
-
                 var productDetails = await _productDetailService.GetAllProductDetailByProductId(id);
 
-                ProductManager productManager = new ProductManager 
-                { 
-                
+                ProductManager productManager = new ProductManager
+                {
+                    ProductId = id,
                     Description = product.Description,
                     ShortDescription = product.ShortDescription,
-                    ProductDetailList = productDetails, 
+                    ProductDetailList = productDetails,
                 };
 
-
-                return Ok(productManager);
+                return Ok(new { data = productManager, Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting all Product Detail.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
-        //[HttpGet("GetRendomProductId/{num}")]
-        //public async Task<ActionResult<Product>> GetRandomProduct(int num)
-        //{
-        //    try
-        //    {
+        [HttpGet("GetProductFullInformation/{id}")]
+        public async Task<ActionResult<ProductManager>> GetProductFullInformation(Guid id)
+        {
+            try
+            {
+                var product = await _productService.GetProductByIdAsync(id);
 
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "An error occurred while getting random Products .");
-        //        return StatusCode(500, ex.Message);
-        //    }
+                var productDetails = await _productDetailService.GetAllProductDetailByProductId(id);
 
-        //}
+                ProductManager productManager = new ProductManager
+                {
+                    ProductId = id,
+                    Description = product.Description,
+                    ShortDescription = product.ShortDescription,
+                    ProductDetailList = productDetails,
+                };
+                var fullData = new
+                {
+                    ProductData = product,
+                    DetailsData = productManager,
+
+                };
+
+                string xType = ResourceType.Product.ToString().ToLower();
+
+                // Update PageVisits table
+                await CreateAndUpdatePageVisits(id, xType);
+
+                return Ok(new { Deta = fullData, Success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting all Product Detail.");
+                return StatusCode(500, new { Message = ex.Message, Success = false });
+            }
+        }
 
         [HttpGet("GetRandomProduct/{num}")]
         public async Task<ActionResult<List<Product>>> GetRandomProduct(int num)
@@ -431,9 +578,9 @@ namespace BHEcom.Api.Controllers
             {
 
                 var products = await _productService.GetRandomProductsAsync(num);
-                var result = GenerateProductObjectList(products);
+                // var result = GenerateProductImageUrl(products);
 
-                return Ok(products);
+                return Ok(new { data = products, Success = true });
             }
             catch (Exception ex)
             {
@@ -441,7 +588,6 @@ namespace BHEcom.Api.Controllers
                 return StatusCode(500, "An error occurred while retrieving products.");
             }
         }
-
 
         [HttpGet("GetLatestProduct/{num}")]
         public async Task<ActionResult<List<Product>>> GetLatestProduct(int num)
@@ -450,9 +596,9 @@ namespace BHEcom.Api.Controllers
             {
 
                 var products = await _productService.GetLatestProductsAsync(num);
-                var result = GenerateProductObjectList(products);
+                // var result = GenerateProductImageUrl(products);
 
-                return Ok(products);
+                return Ok(new { data = products, Success = true });
             }
             catch (Exception ex)
             {
@@ -461,39 +607,49 @@ namespace BHEcom.Api.Controllers
             }
         }
 
-
-
-        private async Task<List<object>> GenerateProductObjectList(IEnumerable<Product> products)
+        [HttpGet("GetFeatureProduct/{num}")]
+        public async Task<ActionResult<List<Product>>> GetFeatureProduct(int num)
         {
-            var result = new List<object>();
-
-            foreach (var product in products)
+            try
             {
-                // Get the image file path from the database field
-                string imagePath = Path.Combine(_environment.WebRootPath, "images", product.Image ?? "");
+                int featureCount = 50;
+                var randomProducts = await _productService.GetTopSellingRandomProductsAsync(featureCount, num);
+                // var result = GenerateProductImageUrl(products);
 
-                byte[]? imageData = null;
-                if (!string.IsNullOrWhiteSpace(product.Image) && System.IO.File.Exists(imagePath))
+                return Ok(new { data = randomProducts, Success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving feature products.");
+                return StatusCode(500, "An error occurred while feature products.");
+            }
+        }
+
+        [HttpPost("GetAllFeatureProduct/{num}")]
+        public async Task<ActionResult<List<Product>>> GetAllFeatureProduct(int num, ProductFilter filterEntity)
+        {
+            try
+            {
+               // var (allProducts, randomProducts) = await _productService.GetTopSellingAndRandomProductsAsync(num, 10);
+                var (products, totalCount) = await _productService.GetAllTopSellingProductsAsync(num, filterEntity);
+                if (products != null && totalCount != null)
                 {
-                    imageData = await System.IO.File.ReadAllBytesAsync(imagePath);
+                    if (totalCount == 0)
+                    {
+                        return Ok(new { Products = new List<Product>(), totalPage = 0, Success = true });
+                    }
+                    // var result = GenerateProductImageUrl(products);
+                    int totalPages = (int)Math.Ceiling((double)totalCount / filterEntity.PageSize);
+                    return Ok(new { data = products, totalPage = totalPages, Success = true });
                 }
 
-                result.Add(new
-                {
-                    product.ProductID,
-                    product.StoreID,
-                    product.CategoryID,
-                    product.BrandID,
-                    product.SellerID,
-                    product.ProductName,
-                    product.Description,
-                    product.ShortDescription,
-                    product.Price,
-                    product.Stock,
-                    Image = imageData != null ? Convert.ToBase64String(imageData) : null
-                });
+                return StatusCode(500, "An error occurred while search products.");
             }
-            return result;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving feature products.");
+                return StatusCode(500, "An error occurred while feature products.");
+            }
         }
 
         [HttpPost("FilterProduct")]
@@ -506,11 +662,11 @@ namespace BHEcom.Api.Controllers
                 {
                     if (totalCount == 0)
                     {
-                        return Ok(new { Products = new List<Product>(), totalPage = 0 });
+                        return Ok(new { data = products, Message = "Data not found!", totalPage = 0, Success = true });
                     }
-                    var result = GenerateProductObjectList(products);
+                    // var result = GenerateProductImageUrl(products);
                     int totalPages = (int)Math.Ceiling((double)totalCount / filterEntity.PageSize);
-                    return Ok(new { Products = products, totalPage = totalPages });
+                    return Ok(new { data = products, totalPage = totalPages, Success = true });
                 }
 
                 return StatusCode(500, "An error occurred while retrieving products.");
@@ -522,6 +678,298 @@ namespace BHEcom.Api.Controllers
             }
         }
 
+        [HttpGet("GetByBrandId/{id}/{pageNumber}/{pageSize}")]
+        public async Task<ActionResult<List<Product>>> GetByBrandId(Guid id, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var (products, totalCount) = await _productService.GetProductByBrandIdAsync(id, pageNumber, pageSize);
+                if (products == null)
+                {
+                    //return NotFound(new { Products = new List<Product>(), totalPage = 0, Success = false });
+                    return Ok(new { Products = products, totalPage = 0, Message = "Data not found!", Success = true });
+                }
 
+                // Calculate the total number of pages
+                int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+                return Ok(new { data = products, totalPage = totalPages, Success = true });
+
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting a product.");
+                return StatusCode(500, new { Message = ex.Message, Success = false });
+            }
+        }
+
+       // [HttpPost("SearchProducts/{searchTerm}")]
+        [HttpPost("SearchProducts")]
+        public async Task<ActionResult<List<Product>>> SearchProducts(ProductFilter filterEntity)
+        {
+            try
+            {
+                var (products, totalCount) = await _productService.SearchProductsAsync(filterEntity);
+                if (products != null && totalCount != null)
+                {
+                    if (totalCount == 0)
+                    {
+                        //return Ok(new { Products = new List<Product>(), totalPage = 0 });
+                        return Ok(new { Products = products, totalPage = 0, Message = "Data not found!", Success = true });
+                    }
+                    // var result = GenerateProductImageUrl(products);
+                    int totalPages = (int)Math.Ceiling((double)totalCount / filterEntity.PageSize);
+                    return Ok(new { data = products, totalPage = totalPages, Success = true });
+                }
+
+                return StatusCode(500, "An error occurred while search products.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving search products.");
+                return StatusCode(500, "An error occurred while search products.");
+            }
+        }
+
+       
+
+        [HttpPost("CreateProductGallery/{id}")]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> CreateProductGallery(Guid id, [FromForm] List<IFormFile>? imageFiles)
+        {
+            try
+            {
+                if (imageFiles == null || imageFiles.Count == 0)
+                {
+                    return Ok(new { Message = "No files were provided.", Success = true });
+                }
+
+                string folderName = "ecom/product"; // Adjust based on the product folder
+
+                List<Images> imagesToAdd = new List<Images>();
+
+                foreach (var imageFile in imageFiles)
+                {
+                    if (imageFile.Length > 0)
+                    {
+                        string imageUrl = await _ftpUploader.UploadFileAsync(imageFile, folderName);
+
+                        // Create Image object
+                        imagesToAdd.Add(new Images
+                        {
+                            ImageId = Guid.NewGuid(),
+                            ImagePath = imageUrl,
+                            XID = id,
+                            XType = ResourceType.Product.ToString().ToLower(),
+                            CreatedAt = DateTime.UtcNow
+                        });
+                    }
+                }
+                // Save images to the database
+                bool isCreated = await _imageService.AddImagelistAsync(imagesToAdd);
+                if (!isCreated)
+                {
+                    return Ok(new
+                    {
+                        Message = "Added unsuccessful!",
+                        Success = false,
+                        UploadedImages = imagesToAdd.Select(i => i.ImagePath).ToList()
+                    });
+                }
+
+                return Ok(new
+                {
+                    Message = "Successfully added.",
+                    Success = true,
+                    UploadedImages = imagesToAdd.Select(i => i.ImagePath).ToList()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while uploading product images.");
+                return StatusCode(500, new { Message = ex.Message, Success = false });
+            }
+        }
+
+
+        [HttpDelete("DeleteProductGallery")]
+        public async Task<ActionResult> DeleteProductGallery(Guid id)
+        {
+            try
+            {
+                string xType = ResourceType.Product.ToString().ToLower();
+
+                var images = await _imageService.GetImagesByXIdAsync(id, xType);
+
+                // Call repository to delete images
+                bool isDeleted = await _imageService.DeleteImagesByXIdAsync(id, xType);
+
+                if (!isDeleted)
+                {
+                    return NotFound(new { Message = "No images found for the provided XID and XType.", Success = false });
+                }
+
+                foreach (var item in images)
+                {
+                    if (!string.IsNullOrEmpty(item.ImagePath))
+                    {
+                        // Image delete code
+                        _ftpUploader.DeleteFile(item.ImagePath);
+                    }
+                }
+
+                return Ok(new { Message = "Images successfully deleted.", Success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while deleting product images.");
+                return StatusCode(500, new { Message = ex.Message, Success = false });
+            }
+        }
+
+
+        [HttpDelete("DeleteSingleImage/{id}")]
+        public async Task<ActionResult> DeleteSingleImage(Guid id)
+        {
+            try
+
+            {
+                // Call repository to delete images
+                var (isDeleted, oldImageUrl) = await _imageService.DeleteImagesByImageIdAsync(id);
+
+                if (!isDeleted)
+                {
+                    return NotFound(new { Message = "No images found for the provided Image ID", Success = false });
+                }
+                if (!string.IsNullOrEmpty(oldImageUrl))
+                {
+                    // Image delete code
+                    _ftpUploader.DeleteFile(oldImageUrl);
+                }
+
+                return Ok(new { Message = "Images successfully deleted.", Success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while deleting product images.");
+                return StatusCode(500, new { Message = ex.Message, Success = false });
+            }
+        }
+
+
+        [HttpGet("GetProductGallery/{id}")]
+        public async Task<ActionResult> GetProductGallery(Guid id)
+        {
+            try
+            {
+                string xType = ResourceType.Product.ToString().ToLower();
+
+                // Call repository to fetch images by XID and XType
+                var images = await _imageService.GetImagesByXIdAsync(id, xType);
+
+                if (images == null || !images.Any())
+                {
+                    return NotFound(new { Message = "No images found for the provided XID and XType.", Success = false });
+                }
+
+                return Ok(new
+                {
+                    Message = "Images retrieved successfully.",
+                    Success = true,
+                    Images = images.Select(i => new
+                    {
+                        i.ImageId,
+                        i.ImagePath,
+                        i.XID,
+                        i.XType,
+                        i.CreatedAt
+                    }).ToList()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving product images.");
+                return StatusCode(500, new { Message = ex.Message, Success = false });
+            }
+        }
+
+        private IEnumerable<Product> GenerateProductImageUrl(IEnumerable<Product> products)
+        {
+            if (products == null || !products.Any())
+                return Enumerable.Empty<Product>();
+
+            var productList = products.ToList();
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var defaultImage = $"{baseUrl}/images/default-product.jpg";
+
+            foreach (var product in productList)
+            {
+                if (!string.IsNullOrEmpty(product.Image))
+                {
+                    // Normalize the path to use the correct directory separator for local file system
+                    var sanitizedPath = product.Image.Replace("\\", "/").Replace("//", "/");
+                    // var sanitizedPath = product.Image.Replace("/", Path.DirectorySeparatorChar.ToString());
+
+                    // Build the full image path for file existence check
+                    var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "Images", sanitizedPath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+
+                    //imagePath = imagePath.Replace("\\", "/").Replace("//", "/");
+
+                    // Check if the file exists
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        // Convert sanitized path to a proper URL format
+                        product.Image = $"{baseUrl}/Images/{sanitizedPath}";
+                    }
+                    else
+                    {
+                        product.Image = defaultImage;
+                    }
+                }
+                else
+                {
+                    product.Image = defaultImage;
+                }
+            }
+
+            return productList;
+        }
+
+        private async Task CreateAndUpdatePageVisits(Guid productId, string type)
+        {
+            try
+            {
+                string currentMonth = DateTime.UtcNow.ToString("MMMM yyyy");
+                var pageVisit = await _productService.GetPageVisitAsync(productId, type, currentMonth);
+
+                if (pageVisit != null)
+                {
+                    // Update existing page visit
+                    pageVisit.Hit += 1;
+                    await _productService.UpdatePageVisitAsync(pageVisit);
+                }
+                else
+                {
+                    // Create new page visit
+                    var newPageVisit = new PageVisit
+                    {
+                        PageVisitID = Guid.NewGuid(),
+                        XID = productId,
+                        XType = type,
+                        Month = currentMonth,
+                        Hit = 1
+                    };
+
+                    await _productService.CreatePageVisitAsync(newPageVisit);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while updating page visits.");
+                throw;
+            }
+
+        }
     }
 }

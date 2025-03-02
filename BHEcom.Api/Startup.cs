@@ -7,6 +7,8 @@ using BHEcom.Services.Implementations;
 using BHEcom.Services.Interfaces;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
+using BHEcom.Common.Helper;
+using BHEcom.Common.Models;
 namespace BHEcom.Api
 {
     public class Startup
@@ -20,6 +22,8 @@ namespace BHEcom.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<FtpSettings>(Configuration.GetSection("FtpSettings"));
+
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowSpecificOrigin",
@@ -51,6 +55,9 @@ namespace BHEcom.Api
             services.AddControllersWithViews();
             services.AddRazorPages();
 
+            services.AddScoped<FtpUploader>();
+
+
             // Repositories
             services.AddScoped<IBrandRepository, BrandRepository>();
             services.AddScoped<IAddressRepository, AddressRepository>();
@@ -77,6 +84,9 @@ namespace BHEcom.Api
             services.AddScoped<IAdminRepository, AdminRepository>();
             services.AddScoped<IAdmin2Repository, Admin2Repository>();
             services.AddScoped<IStoreRepository, StoreRepository>();
+            services.AddScoped<IImageRepository, ImageRepository>();
+            services.AddScoped<IBannerRepository, BannerRepository>();
+            services.AddScoped<ISubscribeRepository, SubscribeRepository>();
 
 
 
@@ -105,6 +115,9 @@ namespace BHEcom.Api
             services.AddScoped<IWishlistService, WishlistService>();
             services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<IStoreService, StoreService>();
+            services.AddScoped<IImageService, ImageService>();
+            services.AddScoped<IBannerService, BannerService>();
+            services.AddScoped<ISubscribeService, SubscribeService>();
 
 
 

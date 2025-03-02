@@ -22,17 +22,28 @@ namespace BHEcom.Data.Repositories
         //    return await _context.Categories.FromSqlRaw("EXEC GetCategories").ToListAsync();
         //}
 
-        public async Task AddAsync(Category category)
+        public async Task<(Guid id, bool isUnique)> AddAsync(Category category)
         {
             try
             {
+                // Check if a category with the same name already exists
+                bool categoryExists = await _context.Categories
+                    .AnyAsync(c => c.CategoryName == category.CategoryName);
+
+                if (categoryExists)
+                {
+                    _logger.LogWarning("A category with the name '{CategoryName}' already exists.", category.CategoryName);
+                    return (Guid.Empty, false ); // Return Guid.Empty to indicate failure
+                }
+
                 await _context.Categories.AddAsync(category);
                 await _context.SaveChangesAsync();
+                return (category.CategoryID,true);
             }
             catch (Exception ex)
             {
-
                _logger.LogError(ex, "An error occurred while adding a category.");
+                throw;
             }
         }
 
@@ -53,17 +64,55 @@ namespace BHEcom.Data.Repositories
         }
 
 
-        public async Task UpdateAsync(Category category)
+        public async Task<(bool isUpdated, string? oldImageUrl, bool isUniqueName)> UpdateAsync(Category category)
         {
             try
             {
-                _context.Categories.Update(category);
+                string? oldImage = string.Empty;
+                // Find the existing user by UserId
+                var existingCategory = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryID == category.CategoryID);
+
+                if (existingCategory == null)
+                {
+                    return (false, oldImage, true); 
+                }
+
+                // Check if the CategoryName has changed and is unique
+                if (existingCategory.CategoryName != category.CategoryName)
+                {
+                    bool isCategoryNameUnique = await _context.Categories
+                        .AnyAsync(c => c.CategoryName == category.CategoryName && c.CategoryID != category.CategoryID);
+
+                    if (!isCategoryNameUnique)
+                    {
+                        _logger.LogWarning($"A category with the name '{category.CategoryName}' already exists.", category.CategoryName);
+                        return (false, oldImage, false);
+                    }
+                }
+
+
+                // Update the UserName
+                existingCategory.CategoryName = category.CategoryName;
+                existingCategory.ParentCategoryID = category.ParentCategoryID;
+                existingCategory.Description = category.Description;
+                existingCategory.ModifiedDate = DateTime.Now;
+                existingCategory.IsActive = true;
+                existingCategory.ModifiedBy = category.ModifiedBy;
+
+                if (category.Image != null)
+                {
+                    oldImage = existingCategory.Image;
+                    existingCategory.Image = category.Image;
+                }
+
+                _context.Categories.Update(existingCategory);
                 await _context.SaveChangesAsync();
+                return (true, oldImage, true);
             }
             catch (Exception ex)
             {
-
                _logger.LogError(ex, "An error occurred while updating a category.");
+                throw;
             }
         }
 

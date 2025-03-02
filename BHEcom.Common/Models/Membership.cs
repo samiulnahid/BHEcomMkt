@@ -12,7 +12,7 @@ namespace BHEcom.Common.Models
     public class Membership
     {
         [Key]
-        public int Id { get; set; }
+        //public int Id { get; set; }
         public Guid UserId { get; set; }
         public Guid ApplicationId { get; set; }
         public string Password { get; set; } 

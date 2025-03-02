@@ -13,13 +13,14 @@ namespace BHEcom.Common.Models
         public Guid OwnerID { get; set; }
         public string? StoreName { get; set; }
         public string? Description { get; set; }
+        public string? Image { get; set; }
 
 
         // Agent Field
         public Guid AgentID { get; set; }
         public string AgencyName { get; set; }
         public string ContactPerson { get; set; }
-        public string ContactEmail { get; set; }
+        public string? ContactEmail { get; set; }
         public string ContactPhone { get; set; }
 
 
@@ -46,12 +47,16 @@ namespace BHEcom.Common.Models
     {
         public List<StoreProductField>? StoreProductField { get; set; } 
     }
-
+    public class ProductFieldDto
+    {
+        public Guid ProductFieldID { get; set; } = Guid.Empty;
+        public string Fields { get; set; }
+    }
     public class CategoryFieldsDto
     {
         public Guid CategoryID { get; set; }
         public Guid StoreCategoryID { get; set; }
-        public List<string> Fields { get; set; }
+        public List<ProductFieldDto> Fields { get; set; }
     }
 
 }

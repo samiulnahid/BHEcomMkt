@@ -14,7 +14,7 @@ namespace BHEcom.Data.Repositories
         Task<Agent> GetByIdAsync(Guid id);
         Task<IEnumerable<Agent>> GetAllAsync();
         Task<bool> UpdateAsync(Agent agent);
-        Task DeleteAsync(Guid id);
+        Task<bool> DeleteAsync(Guid id);
 
 
     }

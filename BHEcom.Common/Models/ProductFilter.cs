@@ -17,6 +17,7 @@ namespace BHEcom.Common.Models
         public decimal? MaxPrice { get; set; } = null;
         public Guid? BrandId { get; set; } = null;    
         public Guid? CategoryId { get; set; } = null;
+        public string? SearchTerm { get; set; } = null;
 
     }
 }

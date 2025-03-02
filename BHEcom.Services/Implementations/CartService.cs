@@ -28,6 +28,10 @@ namespace BHEcom.Services.Implementations
         {
             return await _cartRepository.GetByIdAsync(id);
         }
+         public async Task<Cart> GetCartByuserIdAsync(Guid id)
+        {
+            return await _cartRepository.GetByUserIdAsync(id);
+        }
 
         public async Task<Guid> AddCartAsync(Cart cart)
         {
@@ -47,7 +51,7 @@ namespace BHEcom.Services.Implementations
         {
             return await _cartRepository.GetCartItemsByUserIdAsync(userId);
         }
-         public async Task<List<CartManager>> GetCartManagerByCartIdAsync(Guid cartId)
+        public async Task<List<CartManager>> GetCartManagerByCartIdAsync(Guid cartId)
         {
             return await _cartRepository.GetCartManagerByCartIdAsync(cartId);
         }
@@ -55,6 +59,10 @@ namespace BHEcom.Services.Implementations
         public async Task ClearCartAsync(Guid cartId)
         {
             await _cartRepository.ClearCartAsync(cartId);
+        }
+        public async Task<bool> DeleteFullCartAsync(Guid cartId)
+        {
+            return await _cartRepository.DeleteCartAsync(cartId);
         }
     }
 }

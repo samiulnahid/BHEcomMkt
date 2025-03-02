@@ -25,14 +25,14 @@ namespace BHEcom.Services.Implementations
             return await _brandRepository.GetByIdAsync(id);
         }
 
-        public async Task AddBrandAsync(Brand brand)
+        public async Task<(Guid id, bool isUnique)> AddBrandAsync(Brand brand)
         {
-            await _brandRepository.AddAsync(brand);
+            return await _brandRepository.AddAsync(brand);
         }
 
-        public async Task UpdateBrandAsync(Brand brand)
+        public async Task<(bool isUpdated, string? oldImageUrl, bool isUniqueName)> UpdateBrandAsync(Brand brand)
         {
-            await _brandRepository.UpdateAsync(brand);
+            return await _brandRepository.UpdateAsync(brand);
         }
 
         public async Task DeleteBrandAsync(Guid id)

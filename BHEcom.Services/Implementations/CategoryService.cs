@@ -29,14 +29,14 @@ namespace BHEcom.Services.Implementations
             return await _categoryRepository.GetByIdAsync(id);
         }
 
-        public async Task AddCategoryAsync(Category category)
+        public async Task<(Guid id, bool isUnique)> AddCategoryAsync(Category category)
         {
-            await _categoryRepository.AddAsync(category);
+            return await _categoryRepository.AddAsync(category);
         }
 
-        public async Task UpdateCategoryAsync(Category category)
+        public async Task<(bool isUpdated, string? oldImageUrl, bool isUniqueName)> UpdateCategoryAsync(Category category)
         {
-            await _categoryRepository.UpdateAsync(category);
+            return await _categoryRepository.UpdateAsync(category);
         }
 
         public async Task DeleteCategoryAsync(Guid id)

@@ -66,7 +66,7 @@ namespace BHEcom.Services.Implementations
             return await (_adminRepository.DeleteUserAsync(userId));
         }
 
-       public async Task<(bool IsSuccess, Guid UserId, string RoleName)> ValidateUser(string userName, string password)
+       public async Task<(bool IsSuccess, Guid UserId, string RoleName, string UserName)> ValidateUser(string userName, string password)
         {
             return await _adminRepository.ValidateUser(userName, password);
         }

@@ -48,7 +48,18 @@ namespace BHEcom.Data
         public DbSet<StoreProductField> StoreProductFields { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UsersInRole> UsersInRoles { get; set; }
+        public DbSet<Images> Images { get; set; }
+        public DbSet<Banner> Banners { get; set; }
+        public DbSet<CouponUsage> CouponUsages { get; set; }
+        public DbSet<PageVisit> PageVisits { get; set; }
+        public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<DeliveryDetails> DeliveryDetails { get; set; }
+        public DbSet<DeliveryLog> DeliveryLogs { get; set; }
+        public DbSet<Subscribe> Subscribe { get; set; }
+        public DbSet<WishlistItem> WishlistItems { get; set; }
         public DbSet<CartManager> vw_EcommerceCart { get; set; }
+        public DbSet<WishlistManager> vw_EcommerceWishlist { get; set; }
+        public DbSet<OrderManager> vw_OrderListByUser { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -57,11 +68,21 @@ namespace BHEcom.Data
             // Define mappings and configurations for EF if needed
 
             // Define composite No primary key for UsersInRole
-            modelBuilder.Entity<UsersInRole>().HasNoKey();
+           // modelBuilder.Entity<UsersInRole>().HasNoKey();
+            modelBuilder.Entity<UsersInRole>()
+           .HasKey(u => new { u.UserId, u.RoleId });
+
+            modelBuilder.Entity<Membership>().HasNoKey();
 
             // Map the view to the CartItemViewModel
             modelBuilder.Entity<CartManager>().HasNoKey(); // Views don't have a primary key
             modelBuilder.Entity<CartManager>().ToView("vw_EcommerceCart"); // Replace with your actual view name
+
+             modelBuilder.Entity<WishlistManager>().HasNoKey(); // Views don't have a primary key
+            modelBuilder.Entity<WishlistManager>().ToView("vw_EcommerceWishlist"); // Replace with your actual view name
+            
+             modelBuilder.Entity<OrderManager>().HasNoKey(); // Views don't have a primary key
+            modelBuilder.Entity<OrderManager>().ToView("vw_OrderListByUser"); // Replace with your actual view name
 
             modelBuilder.Entity<IdentityUser>(b =>
             {

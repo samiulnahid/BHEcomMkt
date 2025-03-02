@@ -24,13 +24,13 @@ namespace BHEcom.Api.Controllers
             try
             {
                 await _shippingService.AddShippingAsync(shipping);
-                return CreatedAtAction(nameof(GetById), new { id = shipping.ShippingID }, shipping);
+                return Ok(new { id = shipping.ShippingID, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while adding a shipping.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -40,12 +40,12 @@ namespace BHEcom.Api.Controllers
             try
             {
                 await _shippingService.CreateOrUpdateAsync(shipping);
-                return Ok(new { success = true, message = "Shipping record created or updated successfully.", shipping });
+                return Ok(new { success = true, message = "Shipping record created or updated successfully.", data = shipping });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while creating or updating a shipping.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -57,16 +57,16 @@ namespace BHEcom.Api.Controllers
             try
             {
                 var shipping = await _shippingService.GetShippingByIdAsync(id);
-                if (shipping == null)
-                {
-                    return NotFound();
-                }
-                return Ok(shipping);
+                //if (shipping == null)
+                //{
+                //    return NotFound();
+                //}
+                return Ok(new { data = shipping, Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An error occurred while getById shipping.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -76,12 +76,12 @@ namespace BHEcom.Api.Controllers
             try
             {
                 var shippings = await _shippingService.GetAllShippingsAsync();
-                return Ok(shippings);
+                return Ok(new { data = shippings, Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while get all shipping.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -97,12 +97,12 @@ namespace BHEcom.Api.Controllers
                 }
 
                 await _shippingService.UpdateShippingAsync(shipping);
-                return NoContent();
+                return Ok(new { Message = "Successfully Updated", Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating a shipping.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -112,12 +112,12 @@ namespace BHEcom.Api.Controllers
             try
             {
                 await _shippingService.DeleteShippingAsync(id);
-                return NoContent();
+                return Ok(new { Message = "Successfully Deleted", Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while deleting a shipping.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 

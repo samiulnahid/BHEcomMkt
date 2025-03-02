@@ -27,6 +27,14 @@ namespace BHEcom.Services.Implementations
         {
             return await _cartItemRepository.GetByIdAsync(id);
         }
+        //public async Task<CartItem> GetCartItemByProductIdAsync(Guid id)
+        //{
+        //    return await _cartItemRepository.GetByProductIdAsync(id);
+        //}
+          public async Task<CartItem> GetCartItemByCartandProductIdAsync(Guid cartId, Guid productId)
+        {
+            return await _cartItemRepository.GetByCartandProductIdAsync(cartId, productId);
+        }
 
         public async Task<Guid> AddCartItemAsync(CartItem cartItem)
         {
@@ -41,6 +49,10 @@ namespace BHEcom.Services.Implementations
         public async Task<bool> DeleteCartItemAsync(Guid id)
         {
            return await _cartItemRepository.DeleteAsync(id);
+        }
+         public async Task<(bool Success, string Message)> UpdateCartItemQuantityAsync(Guid cartItemId, string operation)
+        {
+           return await _cartItemRepository.UpdateCartItemQuantityAsync(cartItemId, operation);
         }
 
     }

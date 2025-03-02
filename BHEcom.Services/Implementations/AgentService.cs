@@ -40,9 +40,9 @@ namespace BHEcom.Services.Implementations
             return await _agentRepository.UpdateAsync(agent);
         }
 
-        public async Task DeleteAgentAsync(Guid id)
+        public async Task<bool> DeleteAgentAsync(Guid id)
         {
-            await _agentRepository.DeleteAsync(id);
+            return await _agentRepository.DeleteAsync(id);
         }
     }
 }

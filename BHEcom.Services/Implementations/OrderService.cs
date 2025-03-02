@@ -28,7 +28,7 @@ namespace BHEcom.Services.Implementations
             return await _orderRepository.GetByIdAsync(id);
         }
 
-        public async Task<Guid> AddOrderAsync(Order order)
+        public async Task<(Guid orderId, string orderNumber)> AddOrderAsync(Order order)
         {
             return await _orderRepository.AddAsync(order);
         }
@@ -41,6 +41,36 @@ namespace BHEcom.Services.Implementations
         public async Task DeleteOrderAsync(Guid id)
         {
             await _orderRepository.DeleteAsync(id);
+        }
+
+
+        public async Task<Coupon> GetCouponById(Guid? id)
+        {
+            return await _orderRepository.GetCouponById(id);
+        }
+
+        public async Task<Guid> AddCouponAsync(Coupon coupon)
+        {
+            return await _orderRepository.AddCouponAsync(coupon);
+        }
+      
+
+        public async Task<bool> UpdateCouponAsync(Coupon coupon)
+        {
+            return await _orderRepository.UpdateCouponAsync(coupon);
+        }
+         public async Task<(Coupon? coupon, string result)> ValidateCouponAsync(string code)
+        {
+            return await _orderRepository.ValidateCouponAsync(code);
+        }
+        public async Task<Guid> AddDeliveryDetailsAsync(DeliveryDetails deliveryDetails)
+        {
+            return await _orderRepository.AddDeliveryDetailsAsync(deliveryDetails);
+        }
+
+        public async Task<IEnumerable<OrderManager>> GetAllByUserIdAsync(Guid userId)
+        {
+            return await _orderRepository.GetAllByUserIdAsync(userId);
         }
     }
 }

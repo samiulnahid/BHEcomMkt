@@ -13,7 +13,7 @@ namespace BHEcom.Services.Interfaces
         Task<IEnumerable<ProductDetail>> GetAllProductDetailByProductId(Guid id);
         Task<ProductDetail> GetProductDetailByIdAsync(Guid id);
         Task<bool> AddProductDetailAsync(ProductDetail productDetail);
-        Task UpdateProductDetailAsync(ProductDetail productDetail);
+        Task<bool> UpdateProductDetailAsync(ProductDetail productDetail);
         Task DeleteProductDetailAsync(Guid id);
     }
 

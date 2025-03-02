@@ -50,35 +50,42 @@ namespace BHEcom.Data.Repositories
             return await _context.Stores.ToListAsync();
         }
 
-        public async Task<bool> UpdateAsync(Store store)
+        public async Task<(bool isUpdated, string? oldImageUrl)> UpdateAsync(Store store)
         {
             try
             {
-                
+                string? oldImage = string.Empty;
                 // Find the existing user by UserId
                 var existingStore = await _context.Stores.FirstOrDefaultAsync(s => s.StoreID == store.StoreID);
 
                 if (existingStore == null)
                 {
-                    return false; // Return false if the user is not found
+                    return (false, oldImage);
                 }
 
                 // Update the UserName
                 existingStore.Description = store.Description;
+                //existingStore.Image = store.Image;
                 existingStore.StoreName = store.StoreName;
                 existingStore.ModifiedDate = DateTime.Now;
                 existingStore.IsActive = true;
+
+                if (store.Image != null)
+                {
+                    oldImage = existingStore.Image;
+                    existingStore.Image = store.Image;
+                }
 
                 // Save the changes to the database
                 _context.Stores.Update(existingStore);
                 await _context.SaveChangesAsync();
 
-                return true; // Return true to indicate succe
+                return (true, oldImage);
             }
             catch (Exception ex)
             {
                _logger.LogError(ex, "An error occurred while updating a store.");
-                return false;
+                return (false, null) ;
             }
         }
 
@@ -109,6 +116,7 @@ namespace BHEcom.Data.Repositories
                                     StoreName = store.StoreName,
                                     Description = store.Description,
                                     OwnerID = store.OwnerID,
+                                    Image = store.Image,
 
                                     // Agent Fields
                                     AgentID = agent.AgentID,
@@ -129,7 +137,7 @@ namespace BHEcom.Data.Repositories
                                     UserId = user.UserId,
                                     UserName = user.UserName
                                 }).FirstOrDefaultAsync();
-
+           
             return result;
         }
 
@@ -146,6 +154,7 @@ namespace BHEcom.Data.Repositories
                                     StoreName = store.StoreName,
                                     Description = store.Description,
                                     OwnerID = store.OwnerID,
+                                    Image = store.Image,
 
                                     // Agent Fields
                                     AgentID = agent.AgentID,
@@ -174,27 +183,40 @@ namespace BHEcom.Data.Repositories
         {
             try
             {
-                // Create Store Brands
-                foreach (var storeBrand in storeConfig.StoreBrands)
-                {
-                    storeBrand.StoreBrandID = Guid.NewGuid();
-                    storeBrand.StoreID = storeConfig.StoreID;
-                    storeBrand.IsActive = true;
+                if (storeConfig.StoreBrands != null)
+                { 
+                    // Create Store Brands
+                    foreach (var storeBrand in storeConfig.StoreBrands)
+                    {
 
-                    _context.StoreBrands.Add(storeBrand);
-                    await _context.SaveChangesAsync();
+                        storeBrand.StoreBrandID = Guid.NewGuid();
+                        storeBrand.StoreID = storeConfig.StoreID;
+                        storeBrand.IsActive = true;
+                        _context.StoreBrands.Add(storeBrand);
+                        await _context.SaveChangesAsync();
+
+                    }
+
                 }
-
-                // Create Store Categories
-                foreach (var storeCategory in storeConfig.StoreCategories)
+             
+                if(storeConfig.StoreCategories != null)
                 {
-                    storeCategory.StoreCategoryID = Guid.NewGuid();
-                    storeCategory.StoreID = storeConfig.StoreID;
-                    storeCategory.IsActive = true;
+                    // Create Store Categories
+                    foreach (var storeCategory in storeConfig.StoreCategories)
+                    {
+                        if (storeCategory.StoreCategoryID == Guid.Empty)
+                        {
+                            storeCategory.StoreCategoryID = Guid.NewGuid();
+                            storeCategory.StoreID = storeConfig.StoreID;
+                            storeCategory.IsActive = true;
 
-                    _context.StoreCategories.Add(storeCategory);
-                    await _context.SaveChangesAsync();
+                            _context.StoreCategories.Add(storeCategory);
+                            await _context.SaveChangesAsync();
+                        }
+                       
+                    }
                 }
+                
 
                 return true;
             }
@@ -343,10 +365,10 @@ namespace BHEcom.Data.Repositories
                     field.IsActive = true;
 
                     _context.StoreProductFields.Add(field);
-                    await _context.SaveChangesAsync();
+                    
                 }
 
-
+                await _context.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
@@ -356,6 +378,45 @@ namespace BHEcom.Data.Repositories
                 return false;
             }
         }
+
+        public async Task<bool> UpdateProductFieldsAsync(List<StoreProductField> productFieldList)
+        {
+            try
+            {
+                bool isFound = true;
+                foreach (var updatedField in productFieldList)
+                {
+                    // Fetch the existing entity from the database
+                    var existingField = await _context.StoreProductFields
+                        .FirstOrDefaultAsync(f => f.ProductFieldID == updatedField.ProductFieldID);
+
+                    if (existingField != null)
+                    {
+                        // Update properties
+                        existingField.EntityName = updatedField.EntityName;
+                        existingField.IsActive = true;
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"ProductFieldID {updatedField.ProductFieldID} not found.");
+                        isFound = false;
+                    }
+                }
+
+                // Save all changes
+                await _context.SaveChangesAsync();
+                if (!isFound)
+                    return false;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while updating product fields.");
+                return false;
+            }
+        }
+
+
         public async Task<List<StoreProductField>> GetProductFieldsByStoreId(Guid id)
         {
             return await (from spf in _context.StoreProductFields
@@ -385,6 +446,73 @@ namespace BHEcom.Data.Repositories
             else
                 return false;
             
+        }
+
+        public async Task<(bool Success, string Message, List<Guid>? CategoryIds)> DeleteStoreBrandandStoreCategoryAsync(StoreConfig storeConfig)
+        {
+            bool isDeleteAny = false;
+            var categoriesWithFields = new List<Guid>();
+            var categoriesNameWithFields = new List<String>();
+
+            if (storeConfig.StoreCategories?.Any() == true)
+            {
+                foreach (var storeCategory in storeConfig.StoreCategories)
+                {
+                    
+                    var field = await _context.StoreProductFields
+                                      .FirstOrDefaultAsync(s => s.StoreCategoryID == storeCategory.StoreCategoryID);
+
+                    if (field != null)
+                    {
+                        // Add the StoreCategoryID to the list
+                        categoriesWithFields.Add(storeCategory.StoreCategoryID);
+                        categoriesNameWithFields.Add(storeCategory.CategoryName ?? string.Empty);
+                    }
+
+                    else
+                    {
+                        var ExsitingCategory = await _context.StoreCategories.FindAsync(storeCategory.StoreCategoryID);
+                        if (ExsitingCategory != null)
+                        {
+                            _context.StoreCategories.Remove(ExsitingCategory);
+                            isDeleteAny = true;
+                        }
+                            
+                    }
+                    
+                }
+            }
+
+            // If there are categories with fields, return early with a message
+            if (categoriesWithFields.Any())
+            {
+                string formattedCategoryNames = string.Join(", ", categoriesNameWithFields);
+                return (false, $"{formattedCategoryNames} StoreCategories have related fields in StoreProductFields.", categoriesWithFields);
+            }
+
+
+            // Get all StoreBrands by StoreID
+            var storeBrands = await _context.StoreBrands
+                .Where(b => b.StoreID == storeConfig.StoreID)
+                .ToListAsync();
+
+
+            // Remove StoreBrands if found
+            if (storeBrands.Any())
+            {
+                _context.StoreBrands.RemoveRange(storeBrands);
+                isDeleteAny = true;
+            }
+
+            //var field = await _context.StoreProductFields.FindAsync(id);
+            if (isDeleteAny)
+            {
+                await _context.SaveChangesAsync();
+                return (true, "Deletion successful.", null);
+            }
+            else
+                return (false, "No deletions were made.", null);
+
         }
 
 

@@ -33,9 +33,9 @@ namespace BHEcom.Services.Implementations
            return await _productDetailRepository.AddAsync(productDetail);
         }
 
-        public async Task UpdateProductDetailAsync(ProductDetail productDetail)
+        public async Task<bool> UpdateProductDetailAsync(ProductDetail productDetail)
         {
-            await _productDetailRepository.UpdateAsync(productDetail);
+            return await _productDetailRepository.UpdateAsync(productDetail);
         }
 
         public async Task DeleteProductDetailAsync(Guid id)

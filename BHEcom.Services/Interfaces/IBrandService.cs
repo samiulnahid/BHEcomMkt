@@ -8,8 +8,8 @@ namespace BHEcom.Services.Interfaces
     {
         Task<IEnumerable<Brand>> GetAllBrandsAsync();
         Task<Brand> GetBrandByIdAsync(Guid id);
-        Task AddBrandAsync(Brand brand);
-        Task UpdateBrandAsync(Brand brand);
+        Task<(Guid id, bool isUnique)> AddBrandAsync(Brand brand);
+        Task<(bool isUpdated, string? oldImageUrl, bool isUniqueName)> UpdateBrandAsync(Brand brand);
         Task DeleteBrandAsync(Guid id);
     }
 }

@@ -29,7 +29,7 @@ namespace BHEcom.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while adding a SEO.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -48,7 +48,7 @@ namespace BHEcom.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting a SEO.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -63,7 +63,7 @@ namespace BHEcom.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting all SEO.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -82,7 +82,7 @@ namespace BHEcom.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating a SEO.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -97,7 +97,7 @@ namespace BHEcom.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while deleting a SEO.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using BHEcom.Common.Models;
+﻿using BHEcom.Common.Helper;
+using BHEcom.Common.Models;
 using BHEcom.Data.Repositories;
 using BHEcom.Services.Implementations;
 using BHEcom.Services.Interfaces;
@@ -18,17 +19,20 @@ namespace BHEcom.Api.Controllers
         private readonly IAdminService _adminService;
         private readonly IAddressService _addressService;
         private readonly IAgentService _agentService;
-        public StoreController(IStoreService sotreService, ILogger<StoreRepository> logger, IAddressService addressService, IAgentService agentService, IAdminService adminService)
+        private readonly FtpUploader _ftpUploader;
+        public StoreController(IStoreService sotreService, ILogger<StoreRepository> logger, IAddressService addressService, IAgentService agentService, IAdminService adminService, FtpUploader ftpUploader)
         {
             _storeService = sotreService;
             _addressService = addressService;
             _agentService = agentService;
             _adminService = adminService;
             _logger = logger;
+            _ftpUploader = ftpUploader;
         }
 
         [HttpPost("Create")]
-        public async Task<ActionResult> Create([FromBody] StoreManager stores)
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> Create([FromForm] StoreManager stores, [FromForm] IFormFile imageFile)
         {
             try
             {
@@ -55,6 +59,7 @@ namespace BHEcom.Api.Controllers
                    Address address = new Address
                     {
                         UserID = userId,
+                        Number = stores.ContactPhone,
                         AddressLine1 = stores.AddressLine,
                         City = stores.City,
                         State = stores.State,
@@ -76,6 +81,15 @@ namespace BHEcom.Api.Controllers
 
                     if (agentId != Guid.Empty) {
 
+                        if (imageFile != null && imageFile.Length > 0)
+                        {
+                            string folderName = "ecom/store"; 
+                            string imageUrl = await _ftpUploader.UploadFileAsync(imageFile, folderName);
+
+                            // Assign the uploaded image URL to the product
+                            store.Image = imageUrl;
+                        }
+
                         store.OwnerID = agentId;
                         store.StoreName = stores.StoreName;
                         store.Description = stores.Description;
@@ -84,10 +98,16 @@ namespace BHEcom.Api.Controllers
 
                         storeId = await _storeService.AddStoreAsync(store);
                     }
-
+                    var Data = new
+                    {
+                        StoreId = storeId,
+                        UserId = userId,
+                        AddressId = addressId,
+                        AgentId = agentId,
+                    };
                     if (storeId != Guid.Empty)
                     {
-                        return Ok(new { StoreId = storeId, Success = true });
+                        return Ok(new { data = Data, Success = true });
                     }
                 }
                 return BadRequest(new { Success = false, Message = "Failed to add store." });
@@ -98,7 +118,7 @@ namespace BHEcom.Api.Controllers
             {
 
                 _logger.LogError(ex, "An error occurred while adding a store.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -110,14 +130,14 @@ namespace BHEcom.Api.Controllers
                 var store = await _storeService.GetStoreByIdAsync(id);
                 if (store == null)
                 {
-                    return NotFound();
+                    return Ok(new { data = store, Message = "Data not found!", Success = true });
                 }
-                return Ok(store);
+                return Ok(new { data = store, Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An error occurred while getById store.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -127,17 +147,18 @@ namespace BHEcom.Api.Controllers
             try
             {
                 var stores = await _storeService.GetAllStoreManagersAsync();
-                return Ok(stores);
+                return Ok(new { data = stores, Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while get all sotre.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
         [HttpPut("Update/{id}")]
-        public async Task<ActionResult> Update(Guid id, [FromBody] StoreManager stores)
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult> Update(Guid id, [FromForm] StoreManager stores, [FromForm] IFormFile? imageFile)
         {
             try
             {
@@ -185,23 +206,138 @@ namespace BHEcom.Api.Controllers
 
                     if (isAgentUpdated)
                     {
+
+                        if (imageFile != null && imageFile.Length > 0)
+                        {
+                            string folderName = "ecom/store";
+                            string imageUrl = await _ftpUploader.UploadFileAsync(imageFile, folderName);
+
+                            // Assign the uploaded image URL to the product
+                            store.Image = imageUrl;
+                        }
+
                         store.StoreID = stores.StoreID;
                         store.StoreName = stores.StoreName;
                         store.Description = stores.Description;
                         store.IsActive = true;
 
-                        await _storeService.UpdateStoreAsync(store);
+                        var (isUpdated, oldImageUrl) = await _storeService.UpdateStoreAsync(store);
 
+                        if (!isUpdated)
+                        {
+                            return StatusCode(500, new { Message = "Unsuccessfully Updated", Success = false });
+                        }
+                        if (!string.IsNullOrEmpty(oldImageUrl))
+                        {
+                            // Image delete code
+                            _ftpUploader.DeleteFile(oldImageUrl);
+                        }
+                        var Data = new
+                        {
+                            storeId = store.StoreID,
+                            userId = user.UserId,
+                            addressId = address.AddressID,
+                            agentId = agent.AgentID,
+                        };
+                        return Ok(new { data = Data, Success = true, Message = "Successfully Updated" });
                     }
+                  
                 }
-                return Ok(new { StoreId = store.StoreID, Success = true });
+                return Ok(new {  Success = false, Message = "Update Unsuccessful!" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating a store.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
+
+        // [HttpPut("UpdateTest/{id}")]
+        //public async Task<ActionResult> UpdateTest(Guid id, [FromBody] StoreManager stores)
+        //{
+        //    try
+        //    {
+
+        //        if (id != stores.StoreID)
+        //        {
+        //            return BadRequest();
+        //        }
+
+        //        User user = new User
+        //        {
+        //            UserId = stores.UserId,
+        //            UserName = stores.ContactPhone,
+        //            LoweredUserName = stores.ContactPhone,
+        //            LastActivityDate = DateTime.Now,
+        //        };
+        //        bool isUserUpdate = await _adminService.UpdateUserNameAsync(user);
+
+        //        Store store = new Store();
+        //        if (isUserUpdate)
+        //        {
+
+        //            Address address = new Address
+        //            {
+        //                AddressID = stores.AddressID,
+        //                UserID = stores.UserId,
+        //                AddressLine1 = stores.AddressLine,
+        //                City = stores.City,
+        //                State = stores.State,
+        //                ZipCode = stores.ZipCode,
+        //                Country = stores.Country,
+        //            };
+        //            bool isAddressUpdated = await _addressService.UpdateAddressAsync(address);
+
+        //            Agent agent = new Agent
+        //            {
+        //                AgentID = stores.OwnerID,
+        //                UserID = stores.UserId,
+        //                AgencyName = stores.AgencyName,
+        //                ContactPerson = stores.ContactPerson,
+        //                ContactEmail = stores.ContactEmail,
+        //                ContactPhone = stores.ContactPhone,
+        //            };
+        //            bool isAgentUpdated = await _agentService.UpdateAgentAsync(agent);
+
+        //            if (isAgentUpdated)
+        //            {
+
+        //                //if (imageFile != null && imageFile.Length > 0)
+        //                //{
+        //                //    string folderName = "ecom/store";
+        //                //    string imageUrl = await _ftpUploader.UploadFileAsync(imageFile, folderName);
+
+        //                //    // Assign the uploaded image URL to the product
+        //                //    store.Image = imageUrl;
+        //                //}
+
+        //                store.StoreID = stores.StoreID;
+        //                store.StoreName = stores.StoreName;
+        //                store.Description = stores.Description;
+        //                store.IsActive = true;
+
+        //                var (isUpdated, oldImageUrl) = await _storeService.UpdateStoreAsync(store);
+
+        //                if (!isUpdated)
+        //                {
+        //                    return StatusCode(500, new { Message = "Unsuccessfully Updated", Success = false });
+        //                }
+        //                if (!string.IsNullOrEmpty(oldImageUrl))
+        //                {
+        //                    // Image delete code
+        //                    _ftpUploader.DeleteFile(oldImageUrl);
+        //                }
+
+        //            }
+        //        }
+        //        return Ok(new { id = store.StoreID, Success = true, Message = "Succefully Updated" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "An error occurred while updating a store.");
+        //        return StatusCode(500, new { Message = ex.Message, Success = false });
+        //    }
+        //}
 
         [HttpDelete("Delete/{id}")]
         public async Task<ActionResult> Delete(Guid id)
@@ -214,7 +350,7 @@ namespace BHEcom.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while deleting a store.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -238,33 +374,110 @@ namespace BHEcom.Api.Controllers
 
             if (storeData == null)
             {
-                return NotFound();
+                return Ok(new { data = storeData, Message = "Data not found!", Success = true });
             }
 
-            return Ok(storeData);
+            return Ok(new { data = storeData, Success = true });
         }
 
-        [HttpPost("UpdateStoreConfig/{id}")]
-        public async Task<ActionResult> UpdateStoreConfig(Guid id, [FromBody] StoreConfig storeConfig) {
+        [HttpPost("CreateAndUpdateStoreConfig2/{id}")]
+        public async Task<ActionResult> CreateAndUpdateStoreConfig2(Guid id, [FromBody] StoreConfig storeConfig) 
+        {
 
             if (storeConfig == null)
             {
-                if(storeConfig.StoreBrands == null && storeConfig.StoreCategories == null)
-                {
-                    return BadRequest("Invalid data.");
-                }
+                return BadRequest(new { Message = "Invalid data.", Success = false });
+                
             }
-            bool isDeleted = await _storeService.DeleteStoreConfigAsync(id);
+            var storeData = await _storeService.GetStoreConfigAsync(id);
 
-            if (!isDeleted)
+            if (storeData != null)
             {
-                return BadRequest("Error data.");
-            };
-            bool isCreated = await _storeService.CreateStoreConfigAsync(storeConfig);
-            if (isCreated) {
-            
+                bool isDeleted = await _storeService.DeleteStoreConfigAsync(id);
+                //if (!isDeleted)
+                //{
+                //    return BadRequest(new { Message = "Dalete Faild!.", Success = false });
+                //};
             }
-            return Ok(new { Message = "Successfully Updated", Success = true });
+
+            bool isCreated = await _storeService.CreateStoreConfigAsync(storeConfig);
+            if (!isCreated) {
+                return Ok(new { Message = "Unsuccessful Oparetion", Success = false });
+            }
+            return Ok(new { Message = "Successfully Updated and Create", Success = true });
+        }
+
+        [HttpPost("CreateAndUpdateStoreConfig/{id}")]
+        public async Task<ActionResult> CreateAndUpdateStoreConfig(Guid id, [FromBody] StoreConfig storeConfig) 
+        {
+
+            if (storeConfig == null)
+            {
+                return BadRequest(new { Message = "Invalid data.", Success = false });
+                
+            }
+            var storeData = await _storeService.GetStoreConfigAsync(id);
+            StoreConfig newConfig = new StoreConfig
+            {
+                StoreBrands = new List<StoreBrand>(),
+                StoreCategories = new List<StoreCategory>()
+            };
+            newConfig.StoreID = storeConfig.StoreID;
+
+            if (storeData != null)
+            {
+
+                if (storeConfig.StoreBrands?.Any() == true)
+                {
+                    
+                    newConfig.StoreBrands.AddRange(storeConfig.StoreBrands);
+                   
+                }
+               
+                if (storeData.StoreCategories?.Any() == true)
+                {
+                    foreach (var item in storeData.StoreCategories)
+                    {
+                        // Check if the item exists in storeConfig.StoreCategories
+                        var existsInConfig = storeConfig.StoreCategories?
+                            .Any(sc => sc.StoreCategoryID == item.StoreCategoryID) ?? false;
+
+                        // If it does not exist, add it to newConfig.StoreCategories
+                        if (!existsInConfig)
+                        {
+                            newConfig.StoreCategories.Add(item);
+                        }
+                    }
+
+                }
+
+                //if (storeData?.StoreCategories?.Any() == true)
+                //{
+                //    // Add categories from storeData not present in storeConfig
+                //    var missingCategories = storeData.StoreCategories
+                //        .Where(item => storeConfig.StoreCategories?.All(sc => sc.StoreCategoryID != item.StoreCategoryID) ?? true);
+
+                //    newConfig.StoreCategories.AddRange(missingCategories);
+                //}
+
+
+                if (newConfig.StoreCategories.Any() || newConfig.StoreBrands.Any())
+                {
+                   var ( Success,  Message, CategoryIds) = await _storeService.DeleteStoreBrandandStoreCategoryAsync(newConfig);
+
+                    if (CategoryIds?.Any() == true)
+                    {
+                        return Ok(new {data = CategoryIds, Message, Success = false });
+                    }
+                }
+
+            }
+
+            bool isCreated = await _storeService.CreateStoreConfigAsync(storeConfig);
+            if (!isCreated) {
+                return Ok(new { Message = "Unsuccessful Oparetion", Success = false });
+            }
+            return Ok(new { Message = "Successfully Updated and Create", Success = true });
         }
 
         //[HttpPost("CreateStoreProductField")]
@@ -298,31 +511,96 @@ namespace BHEcom.Api.Controllers
                     {
                         StoreCategoryID = categoryFields.StoreCategoryID,
                         CategoryID = categoryFields.CategoryID,
-                        EntityName = field,
+                        EntityName = field.Fields,
                         IsActive = true
                     });
-                    bool isCreated = await _storeService.CreateStoreProductFieldAsync(storeProductFieldList);
-                    if (!isCreated)
-                    {
-                        return BadRequest("Invalid data.");
-                    }
+                   
+                }
+                bool isCreated = await _storeService.CreateStoreProductFieldAsync(storeProductFieldList);
+                if (!isCreated)
+                {
+                    return BadRequest("Invalid data.");
                 }
             }
 
             return Ok(new { Message = "Successfully Createed", Success = true });
         }
 
+         [HttpPost("CreateandUpdateStoreProductField")]
+        public async Task<ActionResult> CreateandUpdateStoreProductField([FromBody] List<CategoryFieldsDto> data)
+        {
+            if (data == null || !data.Any())
+            {
+                return BadRequest(new { Message = "No data received.", Success = false });
+            }
+
+            var createProductFieldList = new List<StoreProductField>();
+            var updateProductFieldList = new List<StoreProductField>();
+
+            foreach (var categoryFields in data)
+            {
+                foreach (var field in categoryFields.Fields)
+                {
+                    if (field.ProductFieldID == Guid.Empty)
+                    {
+                        createProductFieldList.Add(new StoreProductField
+                        {
+                            StoreCategoryID = categoryFields.StoreCategoryID,
+                            CategoryID = categoryFields.CategoryID,
+                            EntityName = field.Fields,
+                            IsActive = true
+                        });
+                    }
+                    else
+                    {
+                        if (field.ProductFieldID != Guid.Empty)
+                        {
+                            Guid id = field.ProductFieldID;
+                        }
+                        updateProductFieldList.Add(new StoreProductField
+                        {
+                            
+                            ProductFieldID = field.ProductFieldID,
+                            StoreCategoryID = categoryFields.StoreCategoryID,
+                            CategoryID = categoryFields.CategoryID,
+                            EntityName = field.Fields,
+                            IsActive = true
+                        });
+                    }
+                   
+                }
+                if (createProductFieldList.Any())
+                {
+                    bool isCreated = await _storeService.CreateStoreProductFieldAsync(createProductFieldList);
+                    if (!isCreated)
+                    {
+                        return BadRequest(new { Message = "Invalid data.", Success = false });
+                    }
+                }
+               if (updateProductFieldList.Any())
+                {
+                    bool isUpdate= await _storeService.UpdateProductFieldsAsync(updateProductFieldList);
+                    if (!isUpdate)
+                    {
+                        return BadRequest(new { Message = "Invalid data or Store ProductFields Id not Found", Success = false });
+                    }
+                }
+               
+            }
+
+            return Ok(new { Message = "Successfully Create And Update", Success = true });
+        }
+
         [HttpGet("GetStoreProductFieldBySotreId/{id}")]
-        public async Task<ActionResult<StoreConfig>> GetStoreProductFieldBySotreId(Guid id)
+        public async Task<ActionResult<StoreProductField>> GetStoreProductFieldBySotreId(Guid id)
         {
             var allData = await _storeService.GetStoreProductFieldsByStoreId(id);
 
             if (allData == null)
             {
-                return NotFound();
+                return Ok(new { data = allData,Message = "Data not found!", Success = true });
             }
-
-            return Ok(allData);
+            return Ok(new { data = allData, Success = true });
         }
 
         [HttpDelete("DeleteStoreProductField/{id}")]
@@ -336,7 +614,7 @@ namespace BHEcom.Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while deleting a store.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
     }

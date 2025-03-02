@@ -22,22 +22,19 @@ namespace BHEcom.Data.Repositories
 
         public async Task<Guid> AddAsync(Cart cart)
         {
-            try
-            {
-                await _context.Cart.AddAsync(cart);
-                await _context.SaveChangesAsync();
-                return cart.CartID;
-            }
-            catch (Exception ex)
-            {
-               _logger.LogError(ex, "An error occurred while adding a cart.");
-                return Guid.Empty;
-            }
+            await _context.Cart.AddAsync(cart);
+            await _context.SaveChangesAsync();
+            return cart.CartID;
+           
         }
 
         public async Task<Cart> GetByIdAsync(Guid id)
         {
             return await _context.Cart.FindAsync(id);
+        }
+        public async Task<Cart> GetByUserIdAsync(Guid id)
+        {
+            return await _context.Cart.FirstOrDefaultAsync(cart => cart.UserID == id);
         }
 
         public async Task<IEnumerable<Cart>> GetAllAsync()
@@ -86,6 +83,21 @@ namespace BHEcom.Data.Repositories
             var cartItems = _context.CartItems.Where(ci => ci.CartID == cartId);
             _context.CartItems.RemoveRange(cartItems);
             await _context.SaveChangesAsync();
+        }
+         public async Task<bool> DeleteCartAsync(Guid cartId)
+        {
+            var cartItems = _context.CartItems.Where(ci => ci.CartID == cartId);
+            _context.CartItems.RemoveRange(cartItems);
+            await _context.SaveChangesAsync();
+
+            var cart = await _context.Cart.FindAsync(cartId);
+            if (cart != null)
+            {
+                _context.Cart.Remove(cart);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
 
         public async Task<List<CartManager>> GetCartManagerByCartIdAsync(Guid cartId)

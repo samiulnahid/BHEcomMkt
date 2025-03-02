@@ -13,7 +13,7 @@ namespace BHEcom.Data.Repositories
         Task<Store> GetByIdAsync(Guid id);
         //Task<Store> GetByUserIdAsync(Guid id);
         //Task<IEnumerable<Store>> GetAllAsync();
-        Task<bool> UpdateAsync(Store store);
+        Task<(bool isUpdated, string? oldImageUrl)> UpdateAsync(Store store);
         Task<bool> DeleteAsync(Guid id);
         Task<IEnumerable<StoreManager>> GetAllStoreManagersAsync();
         Task<IEnumerable<Store>> GetAllStoresAsync();
@@ -22,9 +22,11 @@ namespace BHEcom.Data.Repositories
         Task<bool> DeletetBrandAndCategoryByStoreIdAsync(Guid storeId);
         Task<bool> CreateBrandAndCategoryByStoreIdAsync(StoreConfig stores);
         Task<bool> CreateProductFieldAsync(List<StoreProductField> productFieldList);
+        Task<bool> UpdateProductFieldsAsync(List<StoreProductField> productFieldList);
         Task<List<StoreProductField>> GetProductFieldsByStoreId(Guid id);
         Task<List<StoreProductField>> GetProductFieldsByCategoryId(Guid id);
         Task<bool> DeleteStoreProductField(Guid id);
+        Task<(bool Success, string Message, List<Guid>? CategoryIds)> DeleteStoreBrandandStoreCategoryAsync(StoreConfig storeConfig);
 
     }
 

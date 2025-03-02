@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System;
 using System.Diagnostics.Metrics;
 using System.Reflection.Emit;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace BHEcom.Data.Repositories
 {
     public class AddressRepository : IAddressRepository
@@ -25,18 +26,10 @@ namespace BHEcom.Data.Repositories
 
         public async Task<Guid> AddAsync(Address address)
         {
-            try
-            {
-                await _context.Addresses.AddAsync(address);
-                await _context.SaveChangesAsync();
-                return address.AddressID;
-            }
-            catch (Exception ex)
-            {
-
-               _logger.LogError(ex, "An error occurred while adding a address.");
-                return Guid.Empty;
-            }
+            await _context.Addresses.AddAsync(address);
+            await _context.SaveChangesAsync();
+            return address.AddressID;
+            
         }
 
         public async Task<Address> GetByIdAsync(Guid id)
@@ -50,6 +43,8 @@ namespace BHEcom.Data.Repositories
                                 {
                                     AddressID = address.AddressID,
                                     UserID = address.UserID,
+                                    FullName = address.FullName,
+                                    Number = address.Number,
                                     AddressType = address.AddressType,
                                     AddressLine1 = address.AddressLine1,
                                     AddressLine2 = address.AddressLine2 ?? "N/A", // Handle null AddressLine2
@@ -62,19 +57,21 @@ namespace BHEcom.Data.Repositories
 
             return result;
         }
-        public async Task<Address?> GetByUserIdAsync(Guid id)
+        public async Task<Address?> GetByUserIdAsync(Guid id, string type)
         {
             var result = await (from address in _context.Addresses
                                 join user in _context.Users
                                 on address.UserID equals user.UserId into addressUserGroup
                                 from user in addressUserGroup.DefaultIfEmpty() 
                                 where address.UserID == id
-                                && address.AddressType != null 
-                                && address.AddressType.Equals("Billing", StringComparison.OrdinalIgnoreCase)
+                                && address.AddressType != null
+                               && address.AddressType.ToLower() == type
                                 select new Address
                                 {
                                     AddressID = address.AddressID,
                                     UserID = address.UserID,
+                                    FullName = address.FullName,
+                                    Number = address.Number,
                                     AddressType = address.AddressType,
                                     AddressLine1 = address.AddressLine1,
                                     AddressLine2 = address.AddressLine2 ?? "N/A", 
@@ -97,6 +94,8 @@ namespace BHEcom.Data.Repositories
                                 {
                                     AddressID = address.AddressID,
                                     UserID = address.UserID,
+                                    FullName = address.FullName,
+                                    Number = address.Number,
                                     AddressType = address.AddressType,
                                     AddressLine1 = address.AddressLine1,
                                     AddressLine2 = address.AddressLine2,
@@ -108,6 +107,41 @@ namespace BHEcom.Data.Repositories
                                 }).ToListAsync();
 
             return result;
+            //return await _context.Addresses.ToListAsync();
+        }
+
+        public async Task<IEnumerable<Address>> GetAllByUserIdAsync(Guid id)
+        {
+            try
+            {
+                var result = await (from address in _context.Addresses
+                                    join user in _context.Users
+                                    on address.UserID equals user.UserId into userGroup
+                                    from user in userGroup.DefaultIfEmpty()
+                                    where address.UserID == id
+                                    select new Address
+                                    {
+                                        AddressID = address.AddressID,
+                                        UserID = address.UserID,
+                                        FullName = address.FullName,
+                                        Number = address.Number,
+                                        AddressType = address.AddressType,
+                                        AddressLine1 = address.AddressLine1,
+                                        AddressLine2 = address.AddressLine2,
+                                        City = address.City,
+                                        State = address.State,
+                                        ZipCode = address.ZipCode,
+                                        Country = address.Country,
+                                        UserName = user.UserName,
+                                    }).ToListAsync();
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
             //return await _context.Addresses.ToListAsync();
         }
 
@@ -161,6 +195,8 @@ namespace BHEcom.Data.Repositories
                     return false;
                 }
 
+                existingAddress.FullName = address.FullName;
+                existingAddress.Number = address.Number;
                 existingAddress.AddressLine1 = address.AddressLine1;
                 existingAddress.City = address.City;
                 existingAddress.State = address.State;

@@ -9,10 +9,22 @@ namespace BHEcom.Data.Repositories
 {
     public interface IWishlistRepository
     {
-        Task AddAsync(Wishlist wishlist);
+        Task<Guid> AddAsync(Wishlist wishlist);
         Task<Wishlist> GetByIdAsync(Guid id);
+        Task<IEnumerable<WishlistManager>> GetListWithItemsByIdAsync(Guid id);
         Task<IEnumerable<Wishlist>> GetAllAsync();
-        Task UpdateAsync(Wishlist wishlist);
-        Task DeleteAsync(Guid id);
+        Task<IEnumerable<WishlistManager>> GetByUserIdAsync(Guid userId);
+        Task<bool> UpdateAsync(Wishlist wishlist);
+        Task<bool> DeleteAsync(Guid id);
+        Task<Wishlist> GetWishlistByUserIdAsync(Guid id);
+        Task ClearWishlistAsync(Guid cartId);
+
+        Task<WishlistItem> GetWishlistItemByWishlistAndProductIdAsync(Guid wishlistId, Guid productId);
+        Task<WishlistItem> GetWishlistItemByIdAsync(Guid id);
+        Task<Guid> AddWishlistItemAsync(WishlistItem wishlistItem);
+        Task<bool> UpdateWishlistItemAsync(WishlistItem wishlistItem);
+        Task<bool> DeleteWishlistByUserId(Guid wishlistId);
+        Task<bool> DeleteFullWishlistAsync(Guid wishlistID);
+        Task<bool> DeleteWishlistItemAsync(Guid id);
     }
 }

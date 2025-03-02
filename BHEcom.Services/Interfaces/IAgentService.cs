@@ -13,6 +13,6 @@ namespace BHEcom.Services.Interfaces
         Task<Agent> GetAgentByIdAsync(Guid id);
         Task<Guid> AddAgentAsync(Agent agent);
         Task<bool> UpdateAgentAsync(Agent agent);
-        Task DeleteAgentAsync(Guid id);
+        Task<bool> DeleteAgentAsync(Guid id);
     }
 }

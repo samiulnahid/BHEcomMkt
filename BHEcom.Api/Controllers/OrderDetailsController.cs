@@ -4,6 +4,7 @@ using BHEcom.Data.Repositories;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BHEcom.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace BHEcom.Api.Controllers
 {
@@ -27,13 +28,13 @@ namespace BHEcom.Api.Controllers
             try
             {
                 await _orderDetailService.AddOrderDetailAsync(orderDetail);
-                return CreatedAtAction(nameof(GetById), new { id = orderDetail.OrderDetailID }, orderDetail);
+                return Ok(new { id = orderDetail.OrderDetailID, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while adding a orderDetail.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
@@ -46,15 +47,15 @@ namespace BHEcom.Api.Controllers
                 var orderDetail = await _orderDetailService.GetOrderDetailByIdAsync(id);
                 if (orderDetail == null)
                 {
-                    return NotFound();
+                    return Ok(new { data = orderDetail,Message="Not Found!", Success = true });
                 }
-                return Ok(orderDetail);
+                return Ok(new { data = orderDetail, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while getting a orderDetail.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
@@ -65,13 +66,13 @@ namespace BHEcom.Api.Controllers
             try
             {
                 var orderDetails = await _orderDetailService.GetAllOrderDetailsAsync();
-                return Ok(orderDetails);
+                return Ok(new { data = orderDetails, Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while getting all orderDetail.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
@@ -87,13 +88,13 @@ namespace BHEcom.Api.Controllers
                 }
 
                 await _orderDetailService.UpdateOrderDetailAsync(orderDetail);
-                return NoContent();
+                return Ok(new { Message = "Successfully Updated", Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while updating a orderDetail.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }
@@ -104,13 +105,13 @@ namespace BHEcom.Api.Controllers
             try
             {
                 await _orderDetailService.DeleteOrderDetailAsync(id);
-                return NoContent();
+                return Ok(new { Message = "Successfully Deleted", Success = true });
             }
             catch (Exception ex)
             {
 
                 _logger.LogError(ex, "An error occurred while deleting a orderDetail.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
 
             }
         }

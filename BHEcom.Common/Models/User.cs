@@ -18,15 +18,26 @@ namespace BHEcom.Common.Models
         public Guid? ApplicationId { get; set; }
         public string UserName { get; set; }
         public string? LoweredUserName { get; set; }
-        public string? Password { get; set; }
-        public string? Email { get; set; }
         public string? MobileAlias { get; set; }
         public bool? IsAnonymous { get; set; } = false;
         public DateTime? LastActivityDate { get; set; }
+       
+
+        [NotMapped]
+        public string? RoleName { get; set; }
+        [NotMapped]
+        public string? Password { get; set; }
+        [NotMapped]
+        public string? Email { get; set; }
+        [NotMapped]
         public string? PasswordSalt { get; set; }
+        [NotMapped]
         public DateTime? LoginDate { get; set; }
+        [NotMapped]
         public bool? IsLogin { get; set; } = false;
+        [NotMapped]
         public DateTime? CreateDate { get; set; }
+        [NotMapped]
         public DateTime? UpdateDate { get; set; }
     }
 }

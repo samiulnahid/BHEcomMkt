@@ -19,4 +19,22 @@ namespace BHEcom.Common.Models
         public string LoweredRoleName { get; set; }
         public string Description { get; set; }
     }
+
+    public enum RoleName
+    {
+        User,
+        Seller,
+        Admin
+    }
+
+
+    public enum ResourceType
+    {
+        Product,
+        Store,
+        Category,
+        Brand
+    }
+
+
 }

@@ -23,12 +23,12 @@ namespace BHEcom.Api.Controllers
             try
             {
                 await _productDetailService.AddProductDetailAsync(productDetail);
-                return CreatedAtAction(nameof(GetById), new { id = productDetail.DetailID }, productDetail);
+                return Ok(new { id = productDetail.DetailID, Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while adding a productDetail.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -40,14 +40,14 @@ namespace BHEcom.Api.Controllers
                 var productDetail = await _productDetailService.GetProductDetailByIdAsync(id);
                 if (productDetail == null)
                 {
-                    return NotFound();
+                    return Ok(new { data = productDetail, Message = "Not Found!", Success = true });
                 }
-                return Ok(productDetail);
+                return Ok(new { data = productDetail, Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting a productDetail.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -57,12 +57,12 @@ namespace BHEcom.Api.Controllers
             try
             {
                 var productDetails = await _productDetailService.GetAllProductDetailsAsync();
-                return Ok(productDetails);
+                return Ok(new { data = productDetails, Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while getting all productDetail.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -75,13 +75,19 @@ namespace BHEcom.Api.Controllers
                 {
                     return BadRequest();
                 }
-                await _productDetailService.UpdateProductDetailAsync(productDetail);
-                return Ok("Successfully Updated");
+                 
+                bool result = await _productDetailService.UpdateProductDetailAsync(productDetail);
+                if (!result)
+                {
+                    return NotFound($"ProductDetail with ID {productDetail.DetailID} not found.");
+                }
+
+                return Ok(new { Message = "Successfully Updated", Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating a productDetail.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -91,12 +97,12 @@ namespace BHEcom.Api.Controllers
             try
             {
                 await _productDetailService.DeleteProductDetailAsync(id);
-                return Ok("Successfully Deleted");
+                return Ok(new { Message = "Successfully Deleted", Success = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while deleting a productDetail.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
     }

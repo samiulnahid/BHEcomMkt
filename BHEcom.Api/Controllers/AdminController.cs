@@ -32,7 +32,7 @@ namespace BHEcom.Api.Controllers
             {
 
                 _logger.LogError(ex, "An error occurred while adding a member.");
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { Message = ex.Message, Success = false });
             }
         }
 
@@ -44,7 +44,7 @@ namespace BHEcom.Api.Controllers
 
                 if (user == null || string.IsNullOrWhiteSpace(user.UserName))
                 {
-                    return Ok(new { Success = false, Message = "User value required! " });
+                    return BadRequest(new { Success = false, Message = "User value required! " });
                 }
 
 
@@ -53,7 +53,7 @@ namespace BHEcom.Api.Controllers
                 bool IsExisted = await _adminService.CheckUserNameExistAsync(user);
                 if (IsExisted)
                 {
-                    return Ok(new { Success = false, Message = "UserName already exist. Please change user name" });
+                    return BadRequest(new { Success = false, Message = "UserName already exist. Please change user name" });
                 }
 
                 user.IsAnonymous = false;
@@ -68,7 +68,28 @@ namespace BHEcom.Api.Controllers
                     _logger.LogError("An error occurred while registering a User.");
                     return StatusCode(500, "Please Enter Valid UserName");
                 }
-                string roleName = "User";
+                if(user.RoleName==null)
+                    return StatusCode(500, "Please Give Role Name");
+
+                string roleName = string.Empty;
+                switch (user.RoleName.ToLower())
+                {
+                    case "user":
+                        roleName = RoleName.User.ToString() ;
+                        break;
+
+                    case "seller":
+                        roleName = RoleName.Seller.ToString();
+                        break;
+
+                    case "admin":
+                        roleName = RoleName.Admin.ToString();
+                        break;
+
+                    default:
+                        return StatusCode(500, "Please Give Correct Role Name");
+                }
+
 
                 Guid userId = await _adminService.RegisterAsyncMembership(user, roleName, user.Email);
 
@@ -78,13 +99,13 @@ namespace BHEcom.Api.Controllers
                 {
                     return StatusCode(500, "Register Unsuccessful");
                 }
-                return Ok(new { UserId = userId, Success = true, Message = "Successfully Register" });
+                return Ok(new { id = userId, Success = true, Message = "Successfully Register" });
             }
                 catch (Exception ex)
                {
 
                    _logger.LogError(ex, "An error occurred while adding a user.");
-                    return StatusCode(500, ex.Message);
+                    return StatusCode(500, new { Message = ex.Message, Success = false });
                 }
             }
 
@@ -98,12 +119,18 @@ namespace BHEcom.Api.Controllers
                 return BadRequest(new { Success = false, Message = "Username and Password are required." });
             }
 
-            var (isSuccess, userId, roleName) = await _adminService.ValidateUser(request.UserName, request.Password);
+            var (isSuccess, userId, roleName,userName) = await _adminService.ValidateUser(request.UserName, request.Password);
 
             if (!isSuccess)
                 return Unauthorized(new { Success = false, Message = "Invalid credentials or account is not approved/locked." });
-
-            return Ok(new { Success = true, UserId = userId, RoleName = roleName, Message = "Login Successful." });
+            var user = new
+            {
+                UserId = userId,
+                UserName = userName,
+                RoleName = roleName,
+                Message = "Login Successful."
+            };
+            return Ok(new { Success = true, data = user });
         }
 
         private bool IsValidEmail(string email)
@@ -134,7 +161,7 @@ namespace BHEcom.Api.Controllers
         //    {
 
         //        _logger.LogError(ex, "An error occurred while getting a agent.");
-        //        return StatusCode(500, ex.Message);
+        //        return StatusCode(500, new { Message = ex.Message, Success = false });
         //    }
         //}
 
@@ -150,7 +177,7 @@ namespace BHEcom.Api.Controllers
         //    {
 
         //        _logger.LogError(ex, "An error occurred while getting all agent.");
-        //        return StatusCode(500, ex.Message);
+        //        return StatusCode(500, new { Message = ex.Message, Success = false });
         //    }
         //}
 
@@ -170,7 +197,7 @@ namespace BHEcom.Api.Controllers
         //    {
 
         //        _logger.LogError(ex, "An error occurred while updating a agent.");
-        //        return StatusCode(500, ex.Message);
+        //        return StatusCode(500, new { Message = ex.Message, Success = false });
         //    }
         //}
 
@@ -186,7 +213,7 @@ namespace BHEcom.Api.Controllers
         //    {
 
         //        _logger.LogError(ex, "An error occurred while deleting a agent.");
-        //        return StatusCode(500, ex.Message);
+        //        return StatusCode(500, new { Message = ex.Message, Success = false });
         //    }
         //}
 

@@ -37,7 +37,7 @@ namespace BHEcom.Services.Implementations
            return await _storeRepository.AddAsync(store);
         }
 
-        public async Task<bool> UpdateStoreAsync(Store store)
+        public async Task<(bool isUpdated, string? oldImageUrl)> UpdateStoreAsync(Store store)
         {
            return await _storeRepository.UpdateAsync(store);
         }
@@ -46,7 +46,7 @@ namespace BHEcom.Services.Implementations
         {
              return await _storeRepository.DeleteAsync(id);
         }
-
+      
         public async Task<StoreConfig> GetStoreConfigAsync(Guid id)
         {
             return await _storeRepository.GetBrandAndCategoryByStoreIdAsync(id);
@@ -64,6 +64,10 @@ namespace BHEcom.Services.Implementations
         {
              return await _storeRepository.CreateProductFieldAsync(storeProductFieldList);
         }
+         public async Task<bool> UpdateProductFieldsAsync(List<StoreProductField> storeProductFieldList)
+        {
+             return await _storeRepository.UpdateProductFieldsAsync(storeProductFieldList);
+        }
        
         public async Task<List<StoreProductField>> GetStoreProductFieldsByStoreId(Guid id)
         {
@@ -77,6 +81,10 @@ namespace BHEcom.Services.Implementations
         public async Task<bool> DeleteStoreProductFieldAsync(Guid id)
         {
             return await _storeRepository.DeleteStoreProductField(id);
+        }
+        public async Task<(bool Success, string Message, List<Guid>? CategoryIds)> DeleteStoreBrandandStoreCategoryAsync(StoreConfig storeConfig)
+        {
+            return await _storeRepository.DeleteStoreBrandandStoreCategoryAsync(storeConfig);
         }
 
     }

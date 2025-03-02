@@ -97,7 +97,7 @@ namespace BHEcom.Data.Repositories
                     }
 
                     // Step 3: Create the user
-                    Guid userId = Guid.NewGuid();
+                    Guid userId = Guid.Empty;
                     using (var createUserCommand = new SqlCommand("aspnet_Membership_CreateUser", connection))
                     {
                         createUserCommand.CommandType = CommandType.StoredProcedure;
@@ -111,7 +111,7 @@ namespace BHEcom.Data.Repositories
                         createUserCommand.Parameters.AddWithValue("@IsApproved", true);
                         createUserCommand.Parameters.AddWithValue("@CurrentTimeUtc", DateTime.UtcNow);
                         createUserCommand.Parameters.AddWithValue("@CreateDate", DateTime.UtcNow);
-                        createUserCommand.Parameters.AddWithValue("@UniqueEmail", 1); // Assuming UniqueEmail is required
+                        createUserCommand.Parameters.AddWithValue("@UniqueEmail", 0); // Assuming UniqueEmail is required
                         createUserCommand.Parameters.AddWithValue("@PasswordFormat", 0); // Assuming PasswordFormat is required
 
                         // Add UserId as OUTPUT parameter
@@ -127,18 +127,31 @@ namespace BHEcom.Data.Repositories
                         userId = (Guid)userIdParameter.Value;
                     }
 
-                    // Step 4: Assign the user to the role
-
-                    using (var addUserToRoleCommand = new SqlCommand("aspnet_UsersInRoles_AddUsersToRoles", connection))
+                    if (userId == Guid.Empty)
                     {
-                        addUserToRoleCommand.CommandType = CommandType.StoredProcedure;
-                        addUserToRoleCommand.Parameters.AddWithValue("@ApplicationName", application.ApplicationName);
-                        addUserToRoleCommand.Parameters.AddWithValue("@UserNames", model.UserName);
-                        addUserToRoleCommand.Parameters.AddWithValue("@RoleNames", roleName);
-                        addUserToRoleCommand.Parameters.AddWithValue("@CurrentTimeUtc", DateTime.UtcNow);
-
-                        await addUserToRoleCommand.ExecuteNonQueryAsync();
+                        return Guid.Empty;
                     }
+
+                    UsersInRole usersInRole = new UsersInRole()
+                    {
+                        UserId = userId,
+                        RoleId = role.RoleId,
+                    };
+                    await _context.UsersInRoles.AddAsync(usersInRole);
+                    await _context.SaveChangesAsync();
+
+                    //// Step 4: Assign the user to the role
+
+                    //using (var addUserToRoleCommand = new SqlCommand("aspnet_UsersInRoles_AddUsersToRoles", connection))
+                    //{
+                    //    addUserToRoleCommand.CommandType = CommandType.StoredProcedure;
+                    //    addUserToRoleCommand.Parameters.AddWithValue("@ApplicationName", application.ApplicationName);
+                    //    addUserToRoleCommand.Parameters.AddWithValue("@UserNames", model.UserName);
+                    //    addUserToRoleCommand.Parameters.AddWithValue("@RoleNames", roleName);
+                    //    addUserToRoleCommand.Parameters.AddWithValue("@CurrentTimeUtc", DateTime.UtcNow);
+
+                    //    await addUserToRoleCommand.ExecuteNonQueryAsync();
+                    //}
 
                     return userId;
                 }
@@ -463,34 +476,42 @@ namespace BHEcom.Data.Repositories
         //    }
         //}
 
-        public async Task<(bool IsSuccess, Guid UserId, string RoleName)> ValidateUser(string userName, string password)
+        public async Task<(bool IsSuccess, Guid UserId, string RoleName, string UserName)> ValidateUser(string userName, string password)
         {
-            var user = await _context.Users
-                                    .FirstOrDefaultAsync(u => u.LoweredUserName == userName.ToLower());
-            if (user == null || user.UserId == Guid.Empty)
-                return (false, Guid.Empty, string.Empty);
+            try
+            {
+                var user = await _context.Users
+                                            .FirstOrDefaultAsync(u => u.LoweredUserName == userName.ToLower());
+                if (user == null || user.UserId == Guid.Empty)
+                    return (false, Guid.Empty, string.Empty, string.Empty);
 
-            var membership = await _context.Memberships
-                                            .FirstOrDefaultAsync(m => m.UserId == user.UserId);
+                var membership = await _context.Memberships
+                                                .FirstOrDefaultAsync(m => m.UserId == user.UserId);
 
-            if (membership == null || !membership.IsApproved || membership.IsLockedOut)
-                return (false, Guid.Empty, string.Empty);
+                if (membership == null || !membership.IsApproved)
+                    return (false, Guid.Empty, string.Empty, string.Empty);
 
-            var hashedPassword = HashPassword(password, membership.PasswordSalt ?? string.Empty); // Assume a password hashing method.
-            if (membership.Password != hashedPassword)
-                return (false, Guid.Empty, string.Empty);
+                var hashedPassword = HashPassword(password, membership.PasswordSalt ?? string.Empty); // Assume a password hashing method.
+                if (membership.Password != hashedPassword)
+                    return (false, Guid.Empty, string.Empty, string.Empty);
 
-            var userRole =await (from ur in _context.UsersInRoles
-                            join r in _context.Roles on ur.RoleId equals r.RoleId
-                            where ur.UserId == user.UserId
-                            select r.RoleName).FirstOrDefaultAsync();
+                var userRole = await (from ur in _context.UsersInRoles
+                                      join r in _context.Roles on ur.RoleId equals r.RoleId
+                                      where ur.UserId == user.UserId
+                                      select r.RoleName).FirstOrDefaultAsync();
 
-            if (userRole == null)
-                return (false, Guid.Empty, string.Empty);
+                if (userRole == null)
+                    return (false, Guid.Empty, string.Empty, string.Empty);
 
-            await UpdateLastActivityDateAsync(user.UserId);
+                await UpdateLastActivityDateAsync(user.UserId);
 
-            return (true, user.UserId, userRole);
+                return (true, user.UserId, userRole, user.UserName);
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
 
 
